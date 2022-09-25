@@ -676,6 +676,24 @@ namespace lwm
     {
     };
     template<typename T>
+    struct remove_extent
+    {
+      typedef T type;
+    };
+    template<typename T>
+    struct remove_extent<T[]>
+    {
+      typedef T type;
+    };
+    template<typename T, size_t MAXN>
+    struct remove_extent<T[MAXN]>
+    {
+      typedef T type;
+    };
+    template<typename T>
+    using remove_extent_t = typename remove_extent<T>::type;
+
+    template<typename T>
     struct decay
     {
       typedef typename remove_reference<T>::type U;
@@ -702,7 +720,7 @@ namespace lwm
 
       static TBase* check(TBase*)
       {
-        return (TBase*)0;
+        return static_cast<TBase*>(0);
       }
 
       template<typename T>
@@ -712,7 +730,7 @@ namespace lwm
       }
 
      public:
-      static const bool value = (sizeof(check((internal*)0)) == sizeof(TBase*));
+      static const bool value = (sizeof(check(static_cast<internal*>(0))) == sizeof(TBase*));
     };
 
     template<typename TBase, typename TDerived>
