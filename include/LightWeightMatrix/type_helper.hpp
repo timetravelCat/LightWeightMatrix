@@ -99,5 +99,49 @@ namespace lwm
     };
     template<typename T, typename T1, typename... TRest>
     using implicit_cast_fixed_point_t = typename implicit_cast_fixed_point<T, T1, TRest...>::type;
+    template<typename T, typename T1, typename... TRest>
+    struct implicit_cast
+    {
+      typedef typename implicit_cast<T, typename implicit_cast<T1, TRest...>::type>::type type;
+    };
+    template<typename T, typename T1>
+    struct implicit_cast<T, T1>
+    {
+      typedef conditional_t<
+          include_floating_point<T, T1>::value,
+          implicit_cast_floating_point_t<T, T1>,
+          conditional_t<
+              (sizeof(T) >= sizeof(T1)),
+              conditional_t<include_signed<T, T1>::value, make_signed_t<T>, T>,
+              conditional_t<include_signed<T, T1>::value, make_signed_t<T1>, T1>>>
+          type;
+    };
+    template<typename T, typename T1, typename... TRest>
+    using implicit_cast_t = typename implicit_cast<T, T1, TRest...>::type;
+    template<typename L, typename R>
+    struct allowed_cast
+    {
+      static_assert(
+          !(is_unsigned<L>::value && is_signed<R>::value),
+          "Allocating unsigned type from singed type is not allowed.");
+      typedef L type;
+    };
+    template<typename L, typename R>
+    using allowed_cast_t = typename allowed_cast<L, R>::type;
+    template<typename T>
+    struct floating_types_holer
+    {
+      typedef conditional_t<is_same<T, float>::value, double, float>
+          type_1;
+      typedef conditional_t<
+          is_same<T, float>::value,
+          long double,
+          conditional_t<is_same<T, double>::value, long double, double>>
+          type_2; 
+    };
+    template<typename T>
+    using floating_types_holer_1 = typename floating_types_holer<T>::type_1;
+    template<typename T>
+    using floating_types_holer_2 = typename floating_types_holer<T>::type_2;
   };  // namespace internal
 };    // namespace lwm

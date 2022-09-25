@@ -159,3 +159,69 @@ TEMPLATE_PRODUCT_TEST_CASE(
 {
   REQUIRE(is_same<typename TestType::type, unsigned int>::value == true);
 }
+
+TEMPLATE_PRODUCT_TEST_CASE(
+    "implicit_cast testing",
+    "[template]",
+    lwm::internal::implicit_cast,
+    ((double, double), (float, double), (int, double), (unsigned int, double, unsigned int, unsigned short), (unsigned, unsigned, double, unsigned)))
+{
+  REQUIRE(is_same<typename TestType::type, double>::value == true);
+}
+
+TEMPLATE_PRODUCT_TEST_CASE(
+    "implicit_cast testing",
+    "[template]",
+    lwm::internal::implicit_cast,
+    ((short, short, int), (unsigned int, short, int), (int, short, short), (unsigned int, short, unsigned int, unsigned short), (unsigned, unsigned, short, int)))
+{
+  REQUIRE(is_same<typename TestType::type, int>::value == true);
+}
+
+TEMPLATE_PRODUCT_TEST_CASE(
+    "allowed_cast testing",
+    "[template]",
+    lwm::internal::allowed_cast,
+    ((float, double), (float, float), (float, long double)))
+{
+    REQUIRE(is_same<typename TestType::type, float>::value == true);
+}
+
+TEMPLATE_PRODUCT_TEST_CASE(
+    "allowed_cast testing",
+    "[template]",
+    lwm::internal::allowed_cast,
+    ((double, double), (double, float), (double, long double)))
+{
+    REQUIRE(is_same<typename TestType::type, double>::value == true);
+}
+
+TEMPLATE_PRODUCT_TEST_CASE(
+    "floating_types_holer testing",
+    "[template]",
+    lwm::internal::floating_types_holer,
+    ((float)))
+{
+    REQUIRE(is_same<typename TestType::type_1, double>::value == true);
+    REQUIRE(is_same<typename TestType::type_2, long double>::value == true);
+}
+
+TEMPLATE_PRODUCT_TEST_CASE(
+    "floating_types_holer testing",
+    "[template]",
+    lwm::internal::floating_types_holer,
+    ((double)))
+{
+    REQUIRE(is_same<typename TestType::type_1, float>::value == true);
+    REQUIRE(is_same<typename TestType::type_2, long double>::value == true);
+}
+
+TEMPLATE_PRODUCT_TEST_CASE(
+    "floating_types_holer testing",
+    "[template]",
+    lwm::internal::floating_types_holer,
+    ((long double)))
+{
+    REQUIRE(is_same<typename TestType::type_1, float>::value == true);
+    REQUIRE(is_same<typename TestType::type_2, double>::value == true);
+}
