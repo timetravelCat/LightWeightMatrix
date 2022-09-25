@@ -8,9 +8,9 @@ set(exe_sources
 )
 
 set(headers
-    include/project/tmp.hpp
+    include/LightWeightMatrix/type_helper.hpp
 )
 
 set(test_sources
-  src/tmp_test.cpp
+  src/test_type_helper.cpp
 )
