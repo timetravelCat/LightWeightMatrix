@@ -282,7 +282,7 @@ namespace lwm
     {
     };
     template<>
-    struct is_signed<wchar_t> : public bool_constant<static_cast<bool>(wchar_t(-1) < wchar_t(0))>
+    struct is_signed<wchar_t> : bool_constant<(wchar_t(-1) < wchar_t(0))>
     {
     };
     template<>
@@ -718,16 +718,16 @@ namespace lwm
       {
       };
 
-      static TBase* check(TBase*)
-      {
-        return static_cast<TBase*>(0);
-      }
+      // static TBase* check(TBase*)
+      // {
+      //   return static_cast<TBase*>(0);
+      // }
 
-      template<typename T>
-      static char check(dummy<T>*)
-      {
-        return 0;
-      }
+      // template<typename T>
+      // static char check(dummy<T>*)
+      // {
+      //   return 0;
+      // }
 
      public:
       static const bool value = (sizeof(check(static_cast<internal*>(0))) == sizeof(TBase*));
