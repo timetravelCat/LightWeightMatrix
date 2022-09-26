@@ -117,8 +117,13 @@ TEST_CASE("Matrix", "[lwm::Matrix]")
     REQUIRE(matrix3[2][1] == static_cast<lwm::internal::allowed_cast_t<float, double>>(arr4[1][0]));
     REQUIRE(matrix3[2][2] == static_cast<lwm::internal::allowed_cast_t<float, double>>(arr4[1][1]));
   }
-  SECTION("reserving bigger changes capacity but not size")
+  SECTION("Accessors(), []")
   {
+    lwm::Matrix<float, 2, 2> matrix_;
+    matrix_[0][1] = 2.0f;
+    matrix_(1,1) = 2.0f;
+    REQUIRE(matrix_[0][1] == 2.0f);
+    REQUIRE(matrix_[1][1] == 2.0f);
   }
   SECTION("reserving smaller does not change size or capacity")
   {

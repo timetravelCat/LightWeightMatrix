@@ -33,7 +33,7 @@ namespace lwm
   class Matrix
   {
     T data[M][N]{};
-    typedef const T data_array[N];
+    typedef T data_array[N];
     template<typename, size_t, size_t>
     friend class Matrix;
 
@@ -211,17 +211,41 @@ namespace lwm
       return data[i][j];
     }
     /**
+     * @brief  Accessors by()
+     * 
+     * @param i rows
+     * @param j cols
+     * @return T& 
+     */
+    inline T& operator()(size_t i, size_t j)
+    {
+      assert(i < M);
+      assert(j < N);
+
+      return data[i][j];
+    }
+    /**
      * @brief Accessors by [][], it dose not support column size checking.
      *
      * @param i rows
      * @return const T*&
      */
-    inline data_array& operator[](size_t i) const
+    inline const data_array& operator[](size_t i) const
     {
       assert(i < M);
       return data[i];
     }
-
+    /**
+     * @brief Accessors by [][], it dose not support column size checking.
+     *
+     * @param i rows
+     * @return const T*&
+     */
+    inline data_array& operator[](size_t i) 
+    {
+      assert(i < M);
+      return data[i];
+    }
    private:
     template<size_t R, size_t C, size_t r, size_t c>
     static void size_static_assert()
