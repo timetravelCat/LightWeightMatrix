@@ -121,7 +121,7 @@ TEST_CASE("Matrix", "[lwm::Matrix]")
   {
     lwm::Matrix<float, 2, 2> matrix_;
     matrix_[0][1] = 2.0f;
-    matrix_(1,1) = 2.0f;
+    matrix_(1, 1) = 2.0f;
     REQUIRE(matrix_[0][1] == 2.0f);
     REQUIRE(matrix_[1][1] == 2.0f);
   }

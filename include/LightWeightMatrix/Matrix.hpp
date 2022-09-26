@@ -40,6 +40,13 @@ namespace lwm
    public:
     Matrix() = default;
 
+    // Todo :implemented methods
+    // copyTo array, copyFrom array (column major / row major)
+    // Hadamard(elementwise) product / elementwise devide
+    // operator* / operator+ / operator- / += / -= / *= / ...
+    // get info string / transpose
+    // slice / row / col / serRow, setCol/ ... / Zero, / setAll / Identity, swap? abs ? max, min / nan check ...
+
     /**
      * @brief Construct a new Matrix object
      *
@@ -195,7 +202,6 @@ namespace lwm
           data[i][j] = static_cast<allowed_cast_t<T, U>>(in.data[i][j]);
       return (*this);
     }
-
     /**
      * @brief Accessors by()
      *
@@ -212,10 +218,10 @@ namespace lwm
     }
     /**
      * @brief  Accessors by()
-     * 
+     *
      * @param i rows
      * @param j cols
-     * @return T& 
+     * @return T&
      */
     inline T& operator()(size_t i, size_t j)
     {
@@ -241,11 +247,12 @@ namespace lwm
      * @param i rows
      * @return const T*&
      */
-    inline data_array& operator[](size_t i) 
+    inline data_array& operator[](size_t i)
     {
       assert(i < M);
       return data[i];
     }
+
    private:
     template<size_t R, size_t C, size_t r, size_t c>
     static void size_static_assert()
