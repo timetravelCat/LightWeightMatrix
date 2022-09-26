@@ -7,6 +7,32 @@ using namespace lwm::internal;
 
 TEST_CASE("Matrix", "[lwm::Matrix]")
 {
+  SECTION("toArray")
+  {
+    float arr[6] = { 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f };
+    lwm::Matrix<float, 2, 3> matrix{ arr };
+
+    // Compile time error
+    // float res[5];
+    // matrix.toArray(res, size_t(1));
+
+    float res[9];
+    matrix.toArray(res, constexpr_cast_size_t(1));
+    REQUIRE(matrix(0, 0) == res[1+0]);
+    REQUIRE(matrix(0, 1) == res[1+1]);
+    REQUIRE(matrix(0, 2) == res[1+2]);
+    REQUIRE(matrix(1, 0) == res[1+3]);
+    REQUIRE(matrix(1, 1) == res[1+4]);
+    REQUIRE(matrix(1, 2) == res[1+5]);
+
+    // Compile time error
+    // float temp[9];
+    // matrix.toArray(temp, constexpr_cast_size_t(4));
+
+
+
+  }
+
   SECTION("Constructor 1) explicit Matrix(const U (&in)[L])")
   {
     // Compile-time errors, error by casting type
@@ -17,7 +43,7 @@ TEST_CASE("Matrix", "[lwm::Matrix]")
 
     float arr[5] = { 1.0f, 2.0f, 3.0f, 4.0f, 5.0f };
     // lwm::Matrix<float, 2, 3> matrix{ arr, 1 };
-    lwm::Matrix<float, 2, 3> matrix{ arr, lwm::const_size_t<1>() };
+    lwm::Matrix<float, 2, 3> matrix{ arr, constexpr_cast_size_t(1) };
 
     // matrix = arr;
     // REQUIRE(matrix(0, 0) == arr[0]);
@@ -93,7 +119,7 @@ TEST_CASE("Matrix", "[lwm::Matrix]")
     // double arr3[3][3] = {{1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}, {7.0, 8.0, 9.0}};
 
     double arr3[2][2] = { { 1.0, 2.0 }, { 3.0, 4.0 } };
-    lwm::Matrix<float, 2, 3> matrix2{ arr3, int(0), int(0) };
+    lwm::Matrix<float, 2, 3> matrix2{ arr3, uint16_t(0), uint16_t(0) };
     matrix2 = arr3;
     REQUIRE(matrix2[0][0] == static_cast<lwm::internal::allowed_cast_t<float, double>>(arr3[0][0]));
     REQUIRE(matrix2[0][1] == static_cast<lwm::internal::allowed_cast_t<float, double>>(arr3[0][1]));

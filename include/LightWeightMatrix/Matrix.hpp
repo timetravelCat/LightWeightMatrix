@@ -17,6 +17,8 @@
 #include "stdio.h"
 #include "type_helper.hpp"
 
+#define constexpr_cast_size_t(x) lwm::const_size_t<x>()
+
 namespace lwm
 {
   using namespace internal;
@@ -38,6 +40,7 @@ namespace lwm
     friend class Matrix;
 
    public:
+    constexpr static size_t SIZE{ M * N };
     Matrix() = default;
 
     // Todo :implemented methods
@@ -48,18 +51,132 @@ namespace lwm
     // slice / row / col / serRow, setCol/ ... / Zero, / setAll / Identity, swap? abs ? max, min / nan check ...
 
     /**
+     * @brief Copy to 1D array Type.
+     *
+     * @tparam U type of array.
+     * @tparam L Length of array.
+     * @tparam type_ enabled only if unsigned fixed point type.
+     * @param offset offset of copied array.
+     */
+    template<
+        typename U,
+        size_t L,
+        typename type_ = size_t,
+        typename = enable_if_t<are_fixed_point<type_>::value && is_unsigned<type_>::value>>
+    void toArray(U (&out)[L], type_ offset = type_(0)) const
+    {
+      static_assert((L >= SIZE), "matrix constructor from array size error");
+      const size_t offset_ = static_cast<size_t>(offset);
+      assert(offset_ <= L);
+      assert((L - offset_ >= SIZE));
+      size_t m{ 0 }, n{ 0 };
+      for (size_t i = offset_; i < offset_ + SIZE; i++)
+      {
+        out[i] = static_cast<allowed_cast_t<T, U>>(data[m][n]);
+        if (++n == N)
+        {
+          m++;
+          n = 0;
+        }
+      }
+    };
+    /**
+     * @brief Copy to 1D array Type, supports compile time size checking
+     *
+     * @tparam U type of array.
+     * @tparam L Length of array.
+     * @tparam type_ enabled only if unsigned constexpr_cast_size_t type.
+     */
+    template<
+        typename U,
+        size_t L,
+        typename type_,
+        typename = void,
+        typename = enable_if_t<is_same<const_size_t<type_::value>, type_>::value, type_>>
+    void toArray(U (&out)[L], type_) const
+    {
+      static_assert((L >= SIZE), "toArray : matrix constructor from array size error");
+      static_assert(type_::value <= L, "toArray : matrix constructor from array size error");
+      static_assert((L - type_::value >= SIZE), "toArray : matrix constructor from array size error");
+      size_t m{ 0 }, n{ 0 };
+      for (size_t i = type_::value; i < type_::value + SIZE; i++)
+      {
+        out[i] = static_cast<allowed_cast_t<T, U>>(data[m][n]);
+        if (++n == N)
+        {
+          m++;
+          n = 0;
+        }
+      }
+    }
+    /**
+     * @brief Copy To 2D array.
+     * 
+     * @tparam U type of array
+     * @tparam R row size of array
+     * @tparam C col size of array
+     * @param r_ row offset of array.
+     * @param c_ col offset of array
+     */
+    template<
+        typename U,
+        size_t R,
+        size_t C,
+        typename type_ = size_t,
+        typename = enable_if_t<are_fixed_point<type_>::value && is_unsigned<type_>::value>>
+    void toArray(const U (&out)[R][C], type_ r_ = type_(0), type_ c_ = type_(0)) const
+    {
+      // const size_t r = static_cast<size_t>(r_);
+      // const size_t c = static_cast<size_t>(c_);
+      // size_static_assert<R, C, 0, 0>();
+      // assert(R >= r_);
+      // assert(C >= c_);
+      // size_assert<R, C>(r, c);
+      // // Todo :: Call SetZero?
+      // for (size_t i = r; i < r + R; i++)
+      //   for (size_t j = c; j < c + C; j++)
+      //     data[i][j] = static_cast<allowed_cast_t<T, U>>(in[i - r][j - c]);
+    }
+    /**
+     * @brief Copy To 2D array, supports compile time size check.
+     */
+    template<
+        typename U,
+        size_t R,
+        size_t C,
+        typename r,
+        typename c,
+        typename = enable_if_t<is_same<const_size_t<r::value>, r>::value && is_same<const_size_t<c::value>, c>::value, void>>
+    void toArray(const U (&in)[R][C], r, c) const
+    {
+      // const size_t r = static_cast<size_t>(r_);
+      // const size_t c = static_cast<size_t>(c_);
+      // size_static_assert<R, C, 0, 0>();
+      // assert(R >= r_);
+      // assert(C >= c_);
+      // size_assert<R, C>(r, c);
+      // // Todo :: Call SetZero?
+      // for (size_t i = r; i < r + R; i++)
+      //   for (size_t j = c; j < c + C; j++)
+      //     data[i][j] = static_cast<allowed_cast_t<T, U>>(in[i - r][j - c]);
+    }
+    /**
      * @brief Construct a new Matrix object from 1D array.
      *
      * @tparam U type of 1D array.
      * @tparam L length of 1D array, supports compile-time checking for size.
      * @param offset container copied from this value.
      */
-    template<typename U, size_t L, typename type_ = size_t, typename = enable_if_t<are_fixed_point<type_>::value>>
+    template<
+        typename U,
+        size_t L,
+        typename type_ = size_t,
+        typename = enable_if_t<are_fixed_point<type_>::value && is_unsigned<type_>::value>>
     explicit Matrix(const U (&in)[L], type_ offset = type_(0))
     {
-      static_assert((L <= M * N), "matrix constructor from array size error");
+      static_assert((L <= SIZE), "matrix constructor from array size error");
       const size_t offset_ = static_cast<size_t>(offset);
-      assert((L + offset_ <= M * N));
+      assert((L + offset_ <= SIZE));
       size_t m{ offset_ / N }, n{ offset_ % N };
       for (size_t i = 0; i < L; i++)
       {
@@ -86,8 +203,8 @@ namespace lwm
         typename = enable_if_t<is_same<const_size_t<type_::value>, type_>::value, type_>>
     explicit Matrix(const U (&in)[L], type_)
     {
-      static_assert((L + type_::value <= M * N), "matrix constructor from array size error");
-      assert((L + type_::value <= M * N));
+      static_assert((L + type_::value <= SIZE), "matrix constructor from array size error");
+      assert((L + type_::value <= SIZE));
       size_t m{ type_::value / N }, n{ type_::value % N };
       for (size_t i = 0; i < L; i++)
       {
@@ -141,7 +258,12 @@ namespace lwm
      * @param r first row index of data.
      * @param c first col index of data.
      */
-    template<typename U, size_t R, size_t C, typename type_ = size_t, typename = enable_if_t<are_fixed_point<type_>::value>>
+    template<
+        typename U,
+        size_t R,
+        size_t C,
+        typename type_ = size_t,
+        typename = enable_if_t<are_fixed_point<type_>::value && is_unsigned<type_>::value>>
     explicit Matrix(const U (&in)[R][C], type_ r_ = type_(0), type_ c_ = type_(0))
     {
       const size_t r = static_cast<size_t>(r_);
@@ -291,7 +413,11 @@ namespace lwm
     {
       static_assert(((M >= (R + r)) && (N >= (C + c))), "Matrix Size Error.");
     }
-    template<size_t R, size_t C, typename type_ = size_t, typename = enable_if_t<are_fixed_point<type_>::value>>
+    template<
+        size_t R,
+        size_t C,
+        typename type_ = size_t,
+        typename = enable_if_t<are_fixed_point<type_>::value && is_unsigned<type_>::value>>
     static void size_assert(const type_& r, const type_& c)
     {
       assert((M >= (R + static_cast<size_t>(r))) && (N >= (C + static_cast<size_t>(c))));
