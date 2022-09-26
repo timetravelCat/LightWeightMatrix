@@ -15,21 +15,23 @@ TEST_CASE("Matrix", "[lwm::Matrix]")
     // double arr2_temp[7] = { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0 };
     // lwm::Matrix<float, 2, 3> matrix_temp{arr2_temp};
 
-    float arr[6] = { 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f };
-    lwm::Matrix<float, 2, 3> matrix{ arr };
-    matrix = arr;
-    REQUIRE(matrix(0, 0) == arr[0]);
-    REQUIRE(matrix(0, 1) == arr[1]);
-    REQUIRE(matrix(0, 2) == arr[2]);
-    REQUIRE(matrix(1, 0) == arr[3]);
-    REQUIRE(matrix(1, 1) == arr[4]);
-    REQUIRE(matrix(1, 2) == arr[5]);
-    REQUIRE(matrix[0][0] == arr[0]);
-    REQUIRE(matrix[0][1] == arr[1]);
-    REQUIRE(matrix[0][2] == arr[2]);
-    REQUIRE(matrix[1][0] == arr[3]);
-    REQUIRE(matrix[1][1] == arr[4]);
-    REQUIRE(matrix[1][2] == arr[5]);
+    float arr[5] = { 1.0f, 2.0f, 3.0f, 4.0f, 5.0f };
+    // lwm::Matrix<float, 2, 3> matrix{ arr, 1 };
+    lwm::Matrix<float, 2, 3> matrix{ arr, lwm::const_size_t<1>() };
+
+    // matrix = arr;
+    // REQUIRE(matrix(0, 0) == arr[0]);
+    REQUIRE(matrix(0, 1) == arr[0]);
+    REQUIRE(matrix(0, 2) == arr[1]);
+    REQUIRE(matrix(1, 0) == arr[2]);
+    REQUIRE(matrix(1, 1) == arr[3]);
+    REQUIRE(matrix(1, 2) == arr[4]);
+    // REQUIRE(matrix[0][0] == arr[0]);
+    REQUIRE(matrix[0][1] == arr[0]);
+    REQUIRE(matrix[0][2] == arr[1]);
+    REQUIRE(matrix[1][0] == arr[2]);
+    REQUIRE(matrix[1][1] == arr[3]);
+    REQUIRE(matrix[1][2] == arr[4]);
 
     double arr2[5] = { 1.0, 2.0, 3.0, 4.0, 5.0 };
     lwm::Matrix<float, 2, 3> matrix2{ arr2 };

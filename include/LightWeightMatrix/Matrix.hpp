@@ -48,15 +48,47 @@ namespace lwm
     // slice / row / col / serRow, setCol/ ... / Zero, / setAll / Identity, swap? abs ? max, min / nan check ...
 
     /**
-     * @brief Construct a new Matrix object
+     * @brief Construct a new Matrix object from 1D array.
      *
      * @tparam U type of 1D array.
      * @tparam L length of 1D array, supports compile-time checking for size.
+     * @param offset container copied from this value.
      */
-    template<typename U, size_t L>
-    explicit Matrix(const U (&in)[L])
+    template<typename U, size_t L, typename type_ = size_t, typename = enable_if_t<are_fixed_point<type_>::value>>
+    explicit Matrix(const U (&in)[L], type_ offset = type_(0))
     {
-      size_t m{ 0 }, n{ 0 };
+      static_assert((L <= M * N), "matrix constructor from array size error");
+      const size_t offset_ = static_cast<size_t>(offset);
+      assert((L + offset_ <= M * N));
+      size_t m{ offset_ / N }, n{ offset_ % N };
+      for (size_t i = 0; i < L; i++)
+      {
+        data[m][n] = static_cast<allowed_cast_t<T, U>>(in[i]);
+        if (++n == N)
+        {
+          m++;
+          n = 0;
+        }
+      }
+    }
+    /**
+     * @brief Construct a new Matrix object from 1D array, supports compile-time size check.
+     *
+     * @tparam U type of 1D array.
+     * @tparam L length of 1D array, supports compile-time checking for size.
+     * @tparam type_ container copied from this value const_size_t<value>()
+     */
+    template<
+        typename U,
+        size_t L,
+        typename type_,
+        typename = void,
+        typename = enable_if_t<is_same<const_size_t<type_::value>, type_>::value, type_>>
+    explicit Matrix(const U (&in)[L], type_)
+    {
+      static_assert((L + type_::value <= M * N), "matrix constructor from array size error");
+      assert((L + type_::value <= M * N));
+      size_t m{ type_::value / N }, n{ type_::value % N };
       for (size_t i = 0; i < L; i++)
       {
         data[m][n] = static_cast<allowed_cast_t<T, U>>(in[i]);
