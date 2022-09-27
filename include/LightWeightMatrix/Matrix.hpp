@@ -44,7 +44,7 @@ namespace lwm
     Matrix() = default;
 
     // check initializer_list supported or not. (compiler-dependent.)
-    // initialization using initializer_list 
+    // initialization using initializer_list
     // Hadamard(elementwise) product / elementwise devide
     // operator* / operator+ / operator- / += / -= / *= / ...
     // get info string / transpose
@@ -61,11 +61,10 @@ namespace lwm
     void toArray(U (&out)[L], size_t offset = size_t(0)) const
     {
       static_assert((L >= SIZE), "matrix constructor from array size error");
-      const size_t offset_ = static_cast<size_t>(offset);
-      assert(offset_ <= L);
-      assert((L - offset_ >= SIZE));
+      assert(offset <= L);
+      assert((L - offset >= SIZE));
       size_t m{ 0 }, n{ 0 };
-      for (size_t i = offset_; i < offset_ + SIZE; i++)
+      for (size_t i = offset; i < offset + SIZE; i++)
       {
         out[i] = static_cast<allowed_cast_t<T, U>>(data[m][n]);
         if (++n == N)
@@ -74,7 +73,7 @@ namespace lwm
           n = 0;
         }
       }
-    };
+    }
     /**
      * @brief Copy to 1D array Type, supports compile time size checking
      *
@@ -153,9 +152,8 @@ namespace lwm
     explicit Matrix(const U (&in)[L], size_t offset = size_t(0))
     {
       static_assert((L <= SIZE), "matrix constructor from array size error");
-      const size_t offset_ = static_cast<size_t>(offset);
-      assert((L + offset_ <= SIZE));
-      size_t m{ offset_ / N }, n{ offset_ % N };
+      assert((L + offset <= SIZE));
+      size_t m{ offset / N }, n{ offset % N };
       for (size_t i = 0; i < L; i++)
       {
         data[m][n] = static_cast<allowed_cast_t<T, U>>(in[i]);
@@ -236,17 +234,15 @@ namespace lwm
      * @param c first col index of data.
      */
     template<typename U, size_t R, size_t C>
-    explicit Matrix(const U (&in)[R][C], size_t r_ = size_t(0), size_t c_ = size_t(0))
+    explicit Matrix(const U (&in)[R][C], size_t r = size_t(0), size_t c = size_t(0))
     {
-      const size_t r = static_cast<size_t>(r_);
-      const size_t c = static_cast<size_t>(c_);
       size_static_assert<R, C, 0, 0>();
       size_assert<R, C>(r, c);
       // Todo :: Call SetZero?
       for (size_t i = r; i < r + R; i++)
         for (size_t j = c; j < c + C; j++)
           data[i][j] = static_cast<allowed_cast_t<T, U>>(in[i - r][j - c]);
-    };
+    }
     /**
      * @brief Corresponding copy constructor of the constructor Matrix(const U (&in)[R][C])
      *
@@ -287,7 +283,7 @@ namespace lwm
       for (size_t i = r::value; i < r::value + R; i++)
         for (size_t j = c::value; j < c::value + C; j++)
           data[i][j] = static_cast<allowed_cast_t<T, U>>(in[i - r::value][j - c::value]);
-    };
+    }
     /**
      * @brief Copy Constructor from other type of Matrix Object.
      *
@@ -393,6 +389,7 @@ namespace lwm
         return data_[U::value];
       }
     };
+
    public:
     /**
      * @brief Accessors by [row][col], it dose not support column size checking.
@@ -405,7 +402,7 @@ namespace lwm
     /**
      * @brief const Accessors by [row][col], supports compile time size check
      */
-    template<typename U, typename = enable_if_t<is_same<const_size_t<U::value>, U>::value>> //
+    template<typename U, typename = enable_if_t<is_same<const_size_t<U::value>, U>::value>>  //
     inline accessor_<const data_array> operator[](U) const
     {
       static_assert(U::value < M, "[] access row size error");
@@ -422,7 +419,7 @@ namespace lwm
     /**
      * @brief Accessors by [row][col], supports compile time size check
      */
-    template<typename U, typename = enable_if_t<is_same<const_size_t<U::value>, U>::value>> //
+    template<typename U, typename = enable_if_t<is_same<const_size_t<U::value>, U>::value>>  //
     inline accessor_<data_array> operator[](U)
     {
       static_assert(U::value < M, "[] access row size error");
@@ -439,7 +436,7 @@ namespace lwm
     /**
      * @brief const Accessors by [row][col], supports compile time size check
      */
-    template<typename U, typename = enable_if_t<is_same<const_size_t<U::value>, U>::value>> //
+    template<typename U, typename = enable_if_t<is_same<const_size_t<U::value>, U>::value>>  //
     inline accessor_<const data_array> operator()(U) const
     {
       static_assert(U::value < M, "() access row size error");
@@ -456,12 +453,13 @@ namespace lwm
     /**
      * @brief Accessors by (row)(col), supports compile time size check
      */
-    template<typename U, typename = enable_if_t<is_same<const_size_t<U::value>, U>::value>> //
+    template<typename U, typename = enable_if_t<is_same<const_size_t<U::value>, U>::value>>  //
     inline accessor_<data_array> operator()(U)
     {
       static_assert(U::value < M, "() access row size error");
       return accessor_<data_array>{ data[U::value] };
     }
+
    private:
     template<size_t R, size_t C, size_t r, size_t c>
     static void size_static_assert()
