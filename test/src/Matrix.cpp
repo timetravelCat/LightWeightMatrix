@@ -17,7 +17,8 @@ TEST_CASE("Matrix", "[lwm::Matrix]")
     // matrix.toArray(res, size_t(1));
 
     float res[9];
-    matrix.toArray(res, constexpr_cast_size_t(1));
+    matrix.toArray(res, 1);
+    // matrix.toArray(res, constexpr_size_t(1));
     REQUIRE(matrix(0, 0) == res[1+0]);
     REQUIRE(matrix(0, 1) == res[1+1]);
     REQUIRE(matrix(0, 2) == res[1+2]);
@@ -27,12 +28,37 @@ TEST_CASE("Matrix", "[lwm::Matrix]")
 
     // Compile time error
     // float temp[9];
-    // matrix.toArray(temp, constexpr_cast_size_t(4));
+    // matrix.toArray(temp, constexpr_size_t(4));
 
+    // Compile time error
+    // float res2_[2][3];
+    // matrix.toArray(res2, constexpr_size_t(1), constexpr_size_t(0));
 
+    float res2[3][5];
+    matrix.toArray(res2, constexpr_size_t(1), constexpr_size_t(2));
+    REQUIRE(matrix(0, 0) == res2[1+0][2+0]);
+    REQUIRE(matrix(0, 1) == res2[1+0][2+1]);
+    REQUIRE(matrix(0, 2) == res2[1+0][2+2]);
+    REQUIRE(matrix(1)(0) == res2[1+1][2+0]);
+    REQUIRE(matrix(1)(1) == res2[1+1][2+1]);
+    REQUIRE(matrix(1)(2) == res2[1+1][2+2]);
 
+    float res3[3][5];
+    matrix.toArray(res3, size_t(1), size_t(2));
+    REQUIRE(matrix(0)(0) == res3[1+0][2+0]);
+    REQUIRE(matrix(0)(1) == res3[1+0][2+1]);
+    REQUIRE(matrix(0)(2) == res3[1+0][2+2]);
+    REQUIRE(matrix(1)(0) == res3[1+1][2+0]);
+    REQUIRE(matrix(1)(1) == res3[1+1][2+1]);
+    REQUIRE(matrix(1)(2) == res3[1+1][2+2]);
+
+    // Compile time error
+    // const auto& test = matrix[(0)][constexpr_size_t(10)];
+    // matrix[constexpr_size_t(10)][constexpr_size_t(0)];
+    // const auto& test = matrix(0)(constexpr_size_t(10));
+    // matrix(constexpr_size_t(10))(constexpr_size_t(0));
   }
-
+  
   SECTION("Constructor 1) explicit Matrix(const U (&in)[L])")
   {
     // Compile-time errors, error by casting type
@@ -43,7 +69,7 @@ TEST_CASE("Matrix", "[lwm::Matrix]")
 
     float arr[5] = { 1.0f, 2.0f, 3.0f, 4.0f, 5.0f };
     // lwm::Matrix<float, 2, 3> matrix{ arr, 1 };
-    lwm::Matrix<float, 2, 3> matrix{ arr, constexpr_cast_size_t(1) };
+    lwm::Matrix<float, 2, 3> matrix{ arr, constexpr_size_t(1) };
 
     // matrix = arr;
     // REQUIRE(matrix(0, 0) == arr[0]);
