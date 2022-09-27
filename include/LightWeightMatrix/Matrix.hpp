@@ -352,17 +352,16 @@ namespace lwm
 
       return data[i][j];
     }
-
    private:
-    template<typename A>
-    class accessor_
+    template<bool isConst>
+    class accessor
     {
-      A& data_;
+      conditional_t<isConst, const data_array&, data_array&> data_;
 
      public:
-      accessor_() = delete;
-      explicit accessor_(const accessor_&) = delete;
-      explicit accessor_(A& data) : data_{ data }
+      accessor() = delete;
+      explicit accessor(const accessor&) = delete;
+      explicit accessor(conditional_t<isConst, const data_array&, data_array&> data) : data_{ data }
       {
       }
 
@@ -389,75 +388,74 @@ namespace lwm
         return data_[U::value];
       }
     };
-
    public:
     /**
      * @brief Accessors by [row][col], it dose not support column size checking.
      */
-    inline accessor_<const data_array> operator[](size_t i) const
+    inline accessor<true> operator[](size_t i) const
     {
       assert(i < M);
-      return accessor_<const data_array>{ data[i] };
+      return accessor<true>{ data[i] };
     }
     /**
      * @brief const Accessors by [row][col], supports compile time size check
      */
-    template<typename U, typename = enable_if_t<is_same<const_size_t<U::value>, U>::value>>  //
-    inline accessor_<const data_array> operator[](U) const
+    template<typename U, typename = enable_if_t<is_same<const_size_t<U::value>, U>::value>>
+    inline accessor<true> operator[](U) const
     {
       static_assert(U::value < M, "[] access row size error");
-      return accessor_<const data_array>{ data[U::value] };
+      return accessor<true>{ data[U::value] };
     }
     /**
      * @brief Accessors by [row][col], it dose not support column size checking.
      */
-    inline accessor_<data_array> operator[](size_t i)
+    inline accessor<false> operator[](size_t i)
     {
       assert(i < M);
-      return accessor_<data_array>{ data[i] };
+      return accessor<false>{ data[i] };
     }
     /**
      * @brief Accessors by [row][col], supports compile time size check
      */
-    template<typename U, typename = enable_if_t<is_same<const_size_t<U::value>, U>::value>>  //
-    inline accessor_<data_array> operator[](U)
+    template<typename U, typename = enable_if_t<is_same<const_size_t<U::value>, U>::value>>
+    inline accessor<false> operator[](U)
     {
       static_assert(U::value < M, "[] access row size error");
-      return accessor_<data_array>{ data[U::value] };
+      return accessor<false>{ data[U::value] };
     }
     /**
      * @brief Accessors by [row][col], it dose not support column size checking.
      */
-    inline accessor_<const data_array> operator()(size_t i) const
+    inline accessor<true> operator()(size_t i) const
     {
       assert(i < M);
-      return accessor_<const data_array>{ data[i] };
+      return accessor<true>{ data[i] };
     }
     /**
      * @brief const Accessors by [row][col], supports compile time size check
      */
-    template<typename U, typename = enable_if_t<is_same<const_size_t<U::value>, U>::value>>  //
-    inline accessor_<const data_array> operator()(U) const
+    template<typename U, typename = enable_if_t<is_same<const_size_t<U::value>, U>::value>>
+    inline accessor<true> operator()(U) const
     {
       static_assert(U::value < M, "() access row size error");
-      return accessor_<const data_array>{ data[U::value] };
+      return accessor<true>{ data[U::value] };
     }
     /**
      * @brief Accessors by (row)(col), it dose not support column size checking.
      */
-    inline accessor_<data_array> operator()(size_t i)
+    inline accessor<false> operator()(size_t i)
     {
       assert(i < M);
-      return accessor_<data_array>{ data[i] };
+      return accessor<false>{ data[i] };
     }
     /**
      * @brief Accessors by (row)(col), supports compile time size check
      */
-    template<typename U, typename = enable_if_t<is_same<const_size_t<U::value>, U>::value>>  //
-    inline accessor_<data_array> operator()(U)
+    template<typename U, typename = enable_if_t<is_same<const_size_t<U::value>, U>::value>>
+    inline accessor<false> operator()(U) 
     {
       static_assert(U::value < M, "() access row size error");
-      return accessor_<data_array>{ data[U::value] };
+      return accessor<false>{ data[U::value] };
     }
 
    private:
