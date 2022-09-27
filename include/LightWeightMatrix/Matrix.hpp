@@ -43,6 +43,7 @@ namespace lwm
     constexpr static size_t SIZE{ M * N };
     Matrix() = default;
 
+    // check initializer_list supported or not. (compiler-dependent.)
     // initialization using initializer_list 
     // Hadamard(elementwise) product / elementwise devide
     // operator* / operator+ / operator- / += / -= / *= / ...
@@ -54,7 +55,6 @@ namespace lwm
      *
      * @tparam U type of array.
      * @tparam L Length of array.
-     * @tparam type_ enabled only if unsigned fixed point type.
      * @param offset offset of copied array.
      */
     template<typename U, size_t L>
@@ -412,7 +412,7 @@ namespace lwm
       return accessor_<const data_array>{ data[U::value] };
     }
     /**
-     * @brief Accessors by [][], it dose not support column size checking.
+     * @brief Accessors by [row][col], it dose not support column size checking.
      */
     inline accessor_<data_array> operator[](size_t i)
     {
@@ -420,7 +420,7 @@ namespace lwm
       return accessor_<data_array>{ data[i] };
     }
     /**
-     * @brief Accessors by [][], supports compile time size check
+     * @brief Accessors by [row][col], supports compile time size check
      */
     template<typename U, typename = enable_if_t<is_same<const_size_t<U::value>, U>::value>> //
     inline accessor_<data_array> operator[](U)
