@@ -1,5 +1,5 @@
 #define CATCH_CONFIG_MAIN
-#include <LightWeightMatrix/type_helper.hpp>
+#include <LightWeightMatrix/internal/type_helper.hpp>
 #include <catch2/catch.hpp>
 
 using namespace lwm::internal;

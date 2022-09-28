@@ -16,7 +16,7 @@ A lightweight template based matrix library.
 ### Prerequisites for Development
 * See **DependencyUbuntu.sh**.
 * **CMake v3.15+** - found at [https://cmake.org/](https://cmake.org/)
-* **C++ Compiler** - needs to support at least the **C++17** standard, i.e. *MSVC*,
+* **C++ Compiler** - needs to support at least the **C++11** standard, i.e. *MSVC*,
 *GCC*, *Clang*
 
 ### Installing

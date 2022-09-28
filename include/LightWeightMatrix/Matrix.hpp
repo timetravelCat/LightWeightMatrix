@@ -12,10 +12,10 @@
 #pragma once
 
 #include <string.h>  //used for info
-
 #include "assert.h"
+#include "internal/type_helper.hpp"
 #include "stdio.h"
-#include "type_helper.hpp"
+
 
 #define constexpr_size_t(x) lwm::const_size_t<x>()
 
@@ -43,12 +43,14 @@ namespace lwm
     constexpr static size_t SIZE{ M * N };
     Matrix() = default;
 
+    // slice / row / col / serRow, setCol/ ... / Zero, / setAll / Identity, swap? abs ? max, min / nan check ...
+    // Todo : include SetCol / SetRow in Initialization codes in order to fill un-initialized values in constructor.
     // check initializer_list supported or not. (compiler-dependent.)
     // initialization using initializer_list
+    
     // Hadamard(elementwise) product / elementwise devide
     // operator* / operator+ / operator- / += / -= / *= / ...
     // get info string / transpose
-    // slice / row / col / serRow, setCol/ ... / Zero, / setAll / Identity, swap? abs ? max, min / nan check ...
 
     /**
      * @brief Copy to 1D array Type.
@@ -164,6 +166,24 @@ namespace lwm
         }
       }
     }
+    // Specialization when N == 1
+    // template<typename U, size_t L, typename = enable_if<N==1>>
+    // explicit Matrix(const U (&in)[L], size_t offset = size_t(0))
+    // {
+    // static_assert((L <= SIZE), "matrix constructor from array size error");
+    // assert((L + offset <= SIZE));
+    // size_t m{ offset / N }, n{ offset % N };
+    // for (size_t i = 0; i < L; i++)
+    // {
+    //   data[m][n] = static_cast<allowed_cast_t<T, U>>(in[i]);
+    //   if (++n == N)
+    //   {
+    //     m++;
+    //     n = 0;
+    //   }
+    // }
+    // }
+
     /**
      * @brief Construct a new Matrix object from 1D array, supports compile-time size check.
      *
@@ -352,6 +372,7 @@ namespace lwm
 
       return data[i][j];
     }
+
    private:
     template<bool isConst>
     class accessor
@@ -388,6 +409,7 @@ namespace lwm
         return data_[U::value];
       }
     };
+
    public:
     /**
      * @brief Accessors by [row][col], it dose not support column size checking.
@@ -452,7 +474,7 @@ namespace lwm
      * @brief Accessors by (row)(col), supports compile time size check
      */
     template<typename U, typename = enable_if_t<is_same<const_size_t<U::value>, U>::value>>
-    inline accessor<false> operator()(U) 
+    inline accessor<false> operator()(U)
     {
       static_assert(U::value < M, "() access row size error");
       return accessor<false>{ data[U::value] };
