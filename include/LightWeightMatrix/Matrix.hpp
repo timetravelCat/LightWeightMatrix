@@ -31,13 +31,13 @@ namespace lwm
    * @tparam M rows
    * @tparam N cols
    */
-  template<typename T, size_t M, size_t N>
+  template<typename T, size_t M, size_t N, typename = enable_if_t<(M>0)&&(N>0)>>
   class Matrix
   {
    protected:
     T data[M][N]{};
     typedef T data_array[N];
-    template<typename, size_t, size_t>
+    template<typename, size_t, size_t, typename>
     friend class Matrix;
 
    public:
@@ -46,7 +46,6 @@ namespace lwm
 
     // slice / row / col / serRow, setCol/ ... / Zero, / setAll / Identity, swap? abs ? max, min / nan check ...
     // Todo : include SetCol / SetRow in Initialization codes in order to fill un-initialized values in constructor.
-    // check initializer_list supported or not. (compiler-dependent.)
     // initialization using initializer_list
 
     // Hadamard(elementwise) product / elementwise devide
@@ -187,11 +186,32 @@ namespace lwm
 
     // Matrix<M, 1> row()
     // Matrix<1, N> col()
-    // Matrix<a, b> slice()
     // void row(value or array or Matrix<M, 1> or Matrix<1, N>)
     // void col(value or array or Matrix<M, 1> or Matrix<1, N>)
     // if M or N => disable [] () operator by template or virtual or overloading in Matrix class
 
+
+    /**
+     * @brief Compile time matrix slice API. 
+     * 
+     * @tparam R size of target matrix row
+     * @tparam C size of target matrix col
+     * @tparam r copy row location
+     * @tparam c copy col location
+     * @return Matrix<T, R, C> 
+     */
+    template<size_t R, size_t C, size_t r = 0, size_t c = 0>
+    Matrix<T, R, C> slice() const
+    {
+      static_assert(R>=1, "row size can not be zero.");
+      static_assert(C>=1, "col size can not be zero.");
+      size_static_assert<R, C, r, c>();
+      Matrix<T, R, C> res;
+      for(size_t i = 0; i < R; i++)
+        for(size_t j = 0; j < C; j++)
+          res[i][j] = data[i+r][j+c];
+      return res;
+    }
     /**
      * @brief Return Transposed Matrix
      *
@@ -377,7 +397,6 @@ namespace lwm
     //       data[i][j] = static_cast<allowed_cast_t<T, U>>(in.data[i][j]);
     //   return (*this);
     // }
-
     /**
      * @brief Explicit conversion to different type
      */

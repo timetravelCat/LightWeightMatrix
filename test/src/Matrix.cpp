@@ -58,7 +58,6 @@ TEST_CASE("Matrix", "[lwm::Matrix]")
     // const auto& test = matrix(0)(constexpr_size_t(10));
     // matrix(constexpr_size_t(10))(constexpr_size_t(0));
   }
-
   SECTION("Constructor 1) explicit Matrix(const U (&in)[L])")
   {
     // Compile-time errors, error by casting type
@@ -201,25 +200,37 @@ TEST_CASE("Matrix", "[lwm::Matrix]")
     transposed_ = matrix.transpose();
     for (int i = 0; i < 2; i++)
       for (int j = 0; j < 3; j++)
-         REQUIRE(transposed[j][i] == matrix[i][j]);
+        REQUIRE(transposed[j][i] == matrix[i][j]);
 
-    Matrix<double, 3, 2> transposed2{matrix.transpose()};
+    Matrix<double, 3, 2> transposed2{ matrix.transpose() };
     Matrix<double, 3, 2> transposed2_;
     transposed2_ = matrix.transpose();
     for (int i = 0; i < 2; i++)
       for (int j = 0; j < 3; j++)
-         REQUIRE(transposed2[j][i] == static_cast<double>(matrix[i][j]));
+        REQUIRE(transposed2[j][i] == static_cast<double>(matrix[i][j]));
 
     Matrix<double, 3, 2> transposed3 = matrix.transpose();
     for (int i = 0; i < 2; i++)
       for (int j = 0; j < 3; j++)
-         REQUIRE(transposed3[j][i] == static_cast<double>(matrix[i][j]));
+        REQUIRE(transposed3[j][i] == static_cast<double>(matrix[i][j]));
 
     Matrix<uint32_t, 2, 3> casted = matrix.cast<uint32_t>();
     for (int i = 0; i < 2; i++)
       for (int j = 0; j < 3; j++)
-         REQUIRE(casted[i][j] == static_cast<uint32_t>(matrix[i][j]));
+        REQUIRE(casted[i][j] == static_cast<uint32_t>(matrix[i][j]));
+  }
+  SECTION("slice")
+  {
+    float arr[6] = { 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f };
+    Matrix<float, 2, 3> matrix1{{ {1.0f, 2.0f, 3.0f}, {4.0f, 5.0f, 6.0f} }};
+    Matrix<float, 2, 3> matrix2{arr};
+    for(size_t i = 0; i < 2; i++)
+      for(size_t j = 0; j < 3; j++)
+        REQUIRE(matrix2[i][j] == matrix1[i][j]);
 
-    // transposed2__ = matrix.transpose();
-  } 
+    auto sliced = matrix2.slice<1,2,1,1>();
+    for(size_t i = 0; i < 1; i++)
+      for(size_t j = 0; j < 2; j++)
+        REQUIRE(sliced[i][j] == matrix1[i+1][j+1]);
+  }
 }
