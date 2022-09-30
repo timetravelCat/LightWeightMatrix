@@ -19,12 +19,12 @@ TEST_CASE("Matrix", "[lwm::Matrix]")
     float res[9];
     matrix.toArray(res, 1);
     // matrix.toArray(res, constexpr_size_t(1));
-    REQUIRE(matrix(0, 0) == res[1+0]);
-    REQUIRE(matrix(0, 1) == res[1+1]);
-    REQUIRE(matrix(0, 2) == res[1+2]);
-    REQUIRE(matrix(1, 0) == res[1+3]);
-    REQUIRE(matrix(1, 1) == res[1+4]);
-    REQUIRE(matrix(1, 2) == res[1+5]);
+    REQUIRE(matrix(0, 0) == res[1 + 0]);
+    REQUIRE(matrix(0, 1) == res[1 + 1]);
+    REQUIRE(matrix(0, 2) == res[1 + 2]);
+    REQUIRE(matrix(1, 0) == res[1 + 3]);
+    REQUIRE(matrix(1, 1) == res[1 + 4]);
+    REQUIRE(matrix(1, 2) == res[1 + 5]);
 
     // Compile time error
     // float temp[9];
@@ -36,21 +36,21 @@ TEST_CASE("Matrix", "[lwm::Matrix]")
 
     float res2[3][5];
     matrix.toArray(res2, constexpr_size_t(1), constexpr_size_t(2));
-    REQUIRE(matrix(0, 0) == res2[1+0][2+0]);
-    REQUIRE(matrix(0, 1) == res2[1+0][2+1]);
-    REQUIRE(matrix(0, 2) == res2[1+0][2+2]);
-    REQUIRE(matrix(1)(0) == res2[1+1][2+0]);
-    REQUIRE(matrix(1)(1) == res2[1+1][2+1]);
-    REQUIRE(matrix(1)(2) == res2[1+1][2+2]);
+    REQUIRE(matrix(0, 0) == res2[1 + 0][2 + 0]);
+    REQUIRE(matrix(0, 1) == res2[1 + 0][2 + 1]);
+    REQUIRE(matrix(0, 2) == res2[1 + 0][2 + 2]);
+    REQUIRE(matrix(1)(0) == res2[1 + 1][2 + 0]);
+    REQUIRE(matrix(1)(1) == res2[1 + 1][2 + 1]);
+    REQUIRE(matrix(1)(2) == res2[1 + 1][2 + 2]);
 
     float res3[3][5];
     matrix.toArray(res3, size_t(1), size_t(2));
-    REQUIRE(matrix(0)(0) == res3[1+0][2+0]);
-    REQUIRE(matrix(0)(1) == res3[1+0][2+1]);
-    REQUIRE(matrix(0)(2) == res3[1+0][2+2]);
-    REQUIRE(matrix(1)(0) == res3[1+1][2+0]);
-    REQUIRE(matrix(1)(1) == res3[1+1][2+1]);
-    REQUIRE(matrix(1)(2) == res3[1+1][2+2]);
+    REQUIRE(matrix(0)(0) == res3[1 + 0][2 + 0]);
+    REQUIRE(matrix(0)(1) == res3[1 + 0][2 + 1]);
+    REQUIRE(matrix(0)(2) == res3[1 + 0][2 + 2]);
+    REQUIRE(matrix(1)(0) == res3[1 + 1][2 + 0]);
+    REQUIRE(matrix(1)(1) == res3[1 + 1][2 + 1]);
+    REQUIRE(matrix(1)(2) == res3[1 + 1][2 + 2]);
 
     // Compile time error
     // const auto& test = matrix[(0)][constexpr_size_t(10)];
@@ -58,7 +58,7 @@ TEST_CASE("Matrix", "[lwm::Matrix]")
     // const auto& test = matrix(0)(constexpr_size_t(10));
     // matrix(constexpr_size_t(10))(constexpr_size_t(0));
   }
-  
+
   SECTION("Constructor 1) explicit Matrix(const U (&in)[L])")
   {
     // Compile-time errors, error by casting type
@@ -179,7 +179,47 @@ TEST_CASE("Matrix", "[lwm::Matrix]")
     REQUIRE(matrix_[0][1] == 2.0f);
     REQUIRE(matrix_[1][1] == 2.0f);
   }
-  SECTION("reserving smaller does not change size or capacity")
+  SECTION("fill")
   {
+    Matrix<double, 2, 3> matrix;
+    matrix.fill(10.0f);
+    for (int i = 0; i < 2; i++)
+      for (int j = 0; j < 3; j++)
+        REQUIRE(matrix[i][j] == 10.0);
+
+    // Compile time error
+    // Matrix<uint32_t, 2, 3> matrix2;
+    // matrix2.fill(10.0);
   }
+  SECTION("transpose & cast")
+  {
+    float arr[2][3] = { { 1.0f, 2.0f, 3.0f }, { 4.0f, 5.0f, 6.0f } };
+    Matrix<float, 2, 3> matrix{ arr };
+
+    Matrix<float, 3, 2> transposed = matrix.transpose();
+    Matrix<float, 3, 2> transposed_;
+    transposed_ = matrix.transpose();
+    for (int i = 0; i < 2; i++)
+      for (int j = 0; j < 3; j++)
+         REQUIRE(transposed[j][i] == matrix[i][j]);
+
+    Matrix<double, 3, 2> transposed2{matrix.transpose()};
+    Matrix<double, 3, 2> transposed2_;
+    transposed2_ = matrix.transpose();
+    for (int i = 0; i < 2; i++)
+      for (int j = 0; j < 3; j++)
+         REQUIRE(transposed2[j][i] == static_cast<double>(matrix[i][j]));
+
+    Matrix<double, 3, 2> transposed3 = matrix.transpose();
+    for (int i = 0; i < 2; i++)
+      for (int j = 0; j < 3; j++)
+         REQUIRE(transposed3[j][i] == static_cast<double>(matrix[i][j]));
+
+    Matrix<uint32_t, 2, 3> casted = matrix.cast<uint32_t>();
+    for (int i = 0; i < 2; i++)
+      for (int j = 0; j < 3; j++)
+         REQUIRE(casted[i][j] == static_cast<uint32_t>(matrix[i][j]));
+
+    // transposed2__ = matrix.transpose();
+  } 
 }

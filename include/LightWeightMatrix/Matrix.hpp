@@ -12,10 +12,10 @@
 #pragma once
 
 #include <string.h>  //used for info
+
 #include "assert.h"
 #include "internal/type_helper.hpp"
 #include "stdio.h"
-
 
 #define constexpr_size_t(x) lwm::const_size_t<x>()
 
@@ -34,6 +34,7 @@ namespace lwm
   template<typename T, size_t M, size_t N>
   class Matrix
   {
+   protected:
     T data[M][N]{};
     typedef T data_array[N];
     template<typename, size_t, size_t>
@@ -47,7 +48,7 @@ namespace lwm
     // Todo : include SetCol / SetRow in Initialization codes in order to fill un-initialized values in constructor.
     // check initializer_list supported or not. (compiler-dependent.)
     // initialization using initializer_list
-    
+
     // Hadamard(elementwise) product / elementwise devide
     // operator* / operator+ / operator- / += / -= / *= / ...
     // get info string / transpose
@@ -183,6 +184,38 @@ namespace lwm
     //   }
     // }
     // }
+
+    // Matrix<M, 1> row()
+    // Matrix<1, N> col()
+    // Matrix<a, b> slice()
+    // void row(value or array or Matrix<M, 1> or Matrix<1, N>)
+    // void col(value or array or Matrix<M, 1> or Matrix<1, N>)
+    // if M or N => disable [] () operator by template or virtual or overloading in Matrix class
+
+    /**
+     * @brief Return Transposed Matrix
+     *
+     * @return Matrix<T, N, M>
+     */
+    Matrix<T, N, M> transpose() const
+    {
+      Matrix<T, N, M> res;
+      for (size_t i = 0; i < M; i++)
+        for (size_t j = 0; j < N; j++)
+          res[j][i] = data[i][j];
+      return res;
+    }
+    /**
+     * @brief fill operation
+     */
+    template<typename U>
+    void fill(const U in)
+    {
+      for (size_t i = 0; i < M; i++)
+        for (size_t j = 0; j < N; j++)
+          data[i][j] = static_cast<allowed_cast_t<T, U>>(in);
+    }
+    Matrix(const Matrix&) = default;
 
     /**
      * @brief Construct a new Matrix object from 1D array, supports compile-time size check.
@@ -322,27 +355,52 @@ namespace lwm
      * @param in Matrix object
      * @return Matrix<T, M, N>& current Matrix object.
      */
-    Matrix<T, M, N>& operator=(const Matrix<T, M, N>& in)
-    {
-      if (this != const_cast<Matrix<T, M, N>*>(&in))
-        for (size_t i = 0; i < M; i++)
-          for (size_t j = 0; j < N; j++)
-            data[i][j] = in.data[i][j];
-      return (*this);
-    }
+    // Matrix& operator=(const Matrix& in)
+    // {
+    //   if (this != const_cast<Matrix*>(&in))
+    //     for (size_t i = 0; i < M; i++)
+    //       for (size_t j = 0; j < N; j++)
+    //         data[i][j] = in.data[i][j];
+    //   return (*this);
+    // }
     /**
      * @brief Copy constructor(operator=) from other type of Matrix object.
      *
      * @tparam U type of Matrix object
      * @return Matrix<T, M, N>& current Matrix object.
      */
+    // template<typename U>
+    // Matrix& operator=(const Matrix<U, M, N>& in)
+    // {
+    //   for (size_t i = 0; i < M; i++)
+    //     for (size_t j = 0; j < N; j++)
+    //       data[i][j] = static_cast<allowed_cast_t<T, U>>(in.data[i][j]);
+    //   return (*this);
+    // }
+
+    /**
+     * @brief Explicit conversion to different type
+     */
     template<typename U>
-    Matrix<T, M, N>& operator=(const Matrix<U, M, N>& in)
+    operator Matrix<U, M, N>() const
     {
+      Matrix<U, M, N> res;
       for (size_t i = 0; i < M; i++)
         for (size_t j = 0; j < N; j++)
-          data[i][j] = static_cast<allowed_cast_t<T, U>>(in.data[i][j]);
-      return (*this);
+          res[i][j] = static_cast<allowed_cast_t<U, T>>(data[i][j]);
+      return res;
+    }
+    /**
+     * @brief Cast operator to other type.
+     */
+    template<typename U, typename = enable_if_t<!is_same<U, T>::value>>
+    Matrix<U, M, N> cast() const
+    {
+      Matrix<U, M, N> res;
+      for (size_t i = 0; i < M; i++)
+        for (size_t j = 0; j < N; j++)
+          res[i][j] = static_cast<U>(data[i][j]);
+      return res;
     }
     /**
      * @brief Accessors by()
@@ -373,7 +431,7 @@ namespace lwm
       return data[i][j];
     }
 
-   private:
+   protected:
     template<bool isConst>
     class accessor
     {
@@ -408,6 +466,8 @@ namespace lwm
         static_assert(U::value < N, "() access col size error");
         return data_[U::value];
       }
+
+      // toArray(out, offset)
     };
 
    public:
@@ -480,7 +540,7 @@ namespace lwm
       return accessor<false>{ data[U::value] };
     }
 
-   private:
+   protected:
     template<size_t R, size_t C, size_t r, size_t c>
     static void size_static_assert()
     {
