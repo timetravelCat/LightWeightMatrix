@@ -222,15 +222,383 @@ TEST_CASE("Matrix", "[lwm::Matrix]")
   SECTION("slice")
   {
     float arr[6] = { 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f };
-    Matrix<float, 2, 3> matrix1{{ {1.0f, 2.0f, 3.0f}, {4.0f, 5.0f, 6.0f} }};
-    Matrix<float, 2, 3> matrix2{arr};
-    for(size_t i = 0; i < 2; i++)
-      for(size_t j = 0; j < 3; j++)
+    Matrix<float, 2, 3> matrix1{ { { 1.0f, 2.0f, 3.0f }, { 4.0f, 5.0f, 6.0f } } };
+    Matrix<float, 2, 3> matrix2{ arr };
+    for (size_t i = 0; i < 2; i++)
+      for (size_t j = 0; j < 3; j++)
         REQUIRE(matrix2[i][j] == matrix1[i][j]);
 
-    auto sliced = matrix2.slice<1,2,1,1>();
-    for(size_t i = 0; i < 1; i++)
-      for(size_t j = 0; j < 2; j++)
-        REQUIRE(sliced[i][j] == matrix1[i+1][j+1]);
+    auto sliced = matrix2.slice<1, 2, 1, 1>();
+    for (size_t i = 0; i < 1; i++)
+      for (size_t j = 0; j < 2; j++)
+        REQUIRE(sliced[i][j] == matrix1[i + 1][j + 1]);
+
+    // auto rowvec = matrix1.row<0>();
+    // auto rowvec2 = matrix1.row<1>();
+    // // auto rowvec2 = matrix1.row<2>();
+    // for (size_t i = 0; i < 3; i++)
+    //   REQUIRE(rowvec[0][i] == matrix1[0][i]);
+    // for (size_t i = 0; i < 3; i++)
+    //   REQUIRE(rowvec2[0][i] == matrix1[1][i]);
+
+    // auto colvec1 = matrix1.col<0>();
+    // auto colvec2 = matrix1.col<1>();
+    // auto colvec3 = matrix1.col<2>();
+    // // auto colvec3 = matrix1.col<3>();
+    // for (size_t i = 0; i < 2; i++)
+    // {
+    //   REQUIRE(colvec1[i][0] == matrix1[i][0]);
+    //   REQUIRE(colvec2[i][0] == matrix1[i][1]);
+    //   REQUIRE(colvec3[i][0] == matrix1[i][2]);
+    // }
+  }
+  SECTION("Vector Accessor & Operator TEST when N==1")
+  {
+    // for double type testing
+    double arr[4] = { 1.0, 2.0, 3.0, 4.0 };
+    const double const_arr[4] = { 1.0, 2.0, 3.0, 4.0 };
+    Matrix<double, 4, 1> test{ arr };
+    Matrix<double, 5, 1> test_comp{ arr };
+    Matrix<double, 5, 2> test_comp_ref{ const_arr };
+
+    const Matrix<double, 4, 1> const_test{ arr };
+    const Matrix<double, 5, 1> const_test_comp{ arr };
+    const Matrix<double, 5, 2> const_test_comp_ref{ arr };
+    
+    // for int type testing
+    int arr_int[4] = { 1, 2, 3, 4 };
+    const int const_arr_int[4] = { 1, 2, 3, 4 };
+
+    Matrix<int, 4, 1> test_int{ arr_int };
+    Matrix<int, 5, 1> test_int_comp{ arr_int };
+    Matrix<int, 5, 2> test_int_comp_ref{ const_arr_int };
+
+    const Matrix<int, 4, 1> const_test_int{ arr_int };
+    const Matrix<int, 5, 1> const_test_int_comp{ arr_int };
+    const Matrix<int, 5, 2> const_test_int_comp_ref{ const_arr_int };
+    
+
+    for (int i = 0; i < 4; i++)
+    {
+      // ==
+      REQUIRE(test_comp[i] == static_cast<double>(i+1));
+      REQUIRE(const_test_comp[i] == static_cast<double>(i+1));
+      REQUIRE(test[i] == test_comp[i]);
+      REQUIRE(test[i] == const_test_comp[i]);
+      REQUIRE(const_test_comp[i] == const_test[i]);
+      REQUIRE(const_test_comp[i] == test_comp[i]);
+      REQUIRE(test[i] == arr[i]);
+      REQUIRE(test[i] == const_arr[i]);
+      REQUIRE(test_comp[i] == arr[i]);
+      REQUIRE(test_comp[i] == const_arr[i]);
+      REQUIRE(static_cast<double>(i+1) == test[i]);
+      REQUIRE(static_cast<double>(i+1) == const_test[i]);
+      REQUIRE(arr[i] == test[i]);
+      REQUIRE(arr[i] == const_test[i]);
+      REQUIRE(const_arr[i] == test[i]);
+      REQUIRE(const_arr[i] == const_test[i]);
+
+      // = 
+      (test_comp[i] = static_cast<double>(i+1));
+      REQUIRE(test_comp[i] == static_cast<double>(i+1));
+      test[i] = test_comp[i];
+      REQUIRE(test[i] == test_comp[i]);
+      test[i] = const_test_comp[i];
+      REQUIRE(test[i] == const_test_comp[i]);
+      test[i] = arr[i];
+      REQUIRE(test[i] == arr[i]);
+      test[i] = const_arr[i];
+      REQUIRE(test[i] == const_arr[i]);
+      
+      arr[i] = test[i].value();
+      REQUIRE(test[i] == arr[i]);
+      arr[i] = const_test[i].value();
+      REQUIRE(test[i] == const_arr[i]);
+
+      // +
+
+      REQUIRE((test[i] + 1.0) == (arr[i] + 1.0));
+      REQUIRE((test(i) + 1.0) == (arr[i] + 1.0));
+      REQUIRE((arr[i] + 1.0) == (test[i] + 1.0));
+      REQUIRE((arr[i] + 1.0) == (test(i) + 1.0));
+      REQUIRE((const_test[i] + 1.0) == (const_arr[i] + 1.0));
+      REQUIRE((const_test(i) + 1.0) == (const_arr[i] + 1.0));
+      REQUIRE((const_arr[i] + 1.0) == (const_test[i] + 1.0));
+      REQUIRE((const_arr[i] + 1.0) == (const_test(i) + 1.0));
+
+      REQUIRE((1.0 + test[i]) == (1.0 + arr[i]));
+      REQUIRE((1.0 + test(i)) == (1.0 + arr[i]));
+      REQUIRE((1.0 + arr[i]) == (1.0 + test[i]));
+      REQUIRE((1.0 + arr[i]) == (1.0 + test(i)));
+      REQUIRE((1.0 + const_test[i]) == (1.0 + const_arr[i]));
+      REQUIRE((1.0 + const_test(i)) == (1.0 + const_arr[i]));
+      REQUIRE((1.0 + const_arr[i]) == (1.0 + const_test[i]));
+      REQUIRE((1.0 + const_arr[i]) == (1.0 + const_test(i)));
+
+      REQUIRE((arr[i] + test[i]) == (arr[i] + arr[i]));
+      REQUIRE((arr[i] + test(i)) == (arr[i] + arr[i]));
+      REQUIRE((arr[i] + arr[i]) == (arr[i] + test[i]));
+      REQUIRE((arr[i] + arr[i]) == (arr[i] + test(i)));
+      REQUIRE((const_arr[i] + const_test[i]) == (const_arr[i] + const_arr[i]));
+      REQUIRE((const_arr[i] + const_test(i)) == (const_arr[i] + const_arr[i]));
+      REQUIRE((const_arr[i] + const_arr[i]) == (const_arr[i] + const_test[i]));
+      REQUIRE((const_arr[i] + const_arr[i]) == (const_arr[i] + const_test(i)));
+
+      REQUIRE((test_comp[i] + test[i]) == (test_comp[i] + arr[i]));
+      REQUIRE((test_comp[i] + test(i)) == (test_comp[i] + arr[i]));
+      REQUIRE((test_comp[i] + const_test[i]) == (test_comp[i] + const_arr[i]));
+      REQUIRE((test_comp[i] + const_test(i)) == (test_comp[i] + const_arr[i]));
+      REQUIRE((test_comp[i] + const_test[i]) == (arr[i] + const_arr[i]));
+      REQUIRE((test_comp[i] + const_test(i)) == (arr[i] + const_arr[i]));
+      REQUIRE((const_test[i] + const_test[i]) == (const_test[i] + const_arr[i]));
+      REQUIRE((const_test[i] + const_test(i)) == (const_test[i] + const_arr[i]));
+
+      // -
+      REQUIRE((test[i] - 1.0) == (arr[i] - 1.0));
+      REQUIRE((test(i) - 1.0) == (arr[i] - 1.0));
+      REQUIRE((arr[i] - 1.0) == (test[i] - 1.0));
+      REQUIRE((arr[i] - 1.0) == (test(i) - 1.0));
+      REQUIRE((const_test[i] - 1.0) == (const_arr[i] - 1.0));
+      REQUIRE((const_test(i) - 1.0) == (const_arr[i] - 1.0));
+      REQUIRE((const_arr[i] - 1.0) == (const_test[i] - 1.0));
+      REQUIRE((const_arr[i] - 1.0) == (const_test(i) - 1.0));
+
+      REQUIRE((1.0 - test[i]) == (1.0 - arr[i]));
+      REQUIRE((1.0 - test(i)) == (1.0 - arr[i]));
+      REQUIRE((1.0 - arr[i]) == (1.0 - test[i]));
+      REQUIRE((1.0 - arr[i]) == (1.0 - test(i)));
+      REQUIRE((1.0 - const_test[i]) == (1.0 - const_arr[i]));
+      REQUIRE((1.0 - const_test(i)) == (1.0 - const_arr[i]));
+      REQUIRE((1.0 - const_arr[i]) == (1.0 - const_test[i]));
+      REQUIRE((1.0 - const_arr[i]) == (1.0 - const_test(i)));
+
+      REQUIRE((arr[i] - test[i]) == (arr[i] - arr[i]));
+      REQUIRE((arr[i] - test(i)) == (arr[i] - arr[i]));
+      REQUIRE((arr[i] - arr[i]) == (arr[i] - test[i]));
+      REQUIRE((arr[i] - arr[i]) == (arr[i] - test(i)));
+      REQUIRE((const_arr[i] - const_test[i]) == (const_arr[i] - const_arr[i]));
+      REQUIRE((const_arr[i] - const_test(i)) == (const_arr[i] - const_arr[i]));
+      REQUIRE((const_arr[i] - const_arr[i]) == (const_arr[i] - const_test[i]));
+      REQUIRE((const_arr[i] - const_arr[i]) == (const_arr[i] - const_test(i)));
+
+      REQUIRE((test_comp[i] - test[i]) == (test_comp[i] - arr[i]));
+      REQUIRE((test_comp[i] - test(i)) == (test_comp[i] - arr[i]));
+      REQUIRE((test_comp[i] - const_test[i]) == (test_comp[i] - const_arr[i]));
+      REQUIRE((test_comp[i] - const_test(i)) == (test_comp[i] - const_arr[i]));
+      REQUIRE((const_test[i] - const_test[i]) == (const_test[i] - const_arr[i]));
+      REQUIRE((const_test[i] - const_test(i)) == (const_test[i] - const_arr[i]));
+
+      // *
+      REQUIRE((test[i] * 2.1) == (arr[i] * 2.1));
+      REQUIRE((test(i) * 2.1) == (arr[i] * 2.1));
+      REQUIRE((arr[i] * 2.1) == (test[i] * 2.1));
+      REQUIRE((arr[i] * 2.1) == (test(i) * 2.1));
+      REQUIRE((const_test[i] * 2.1) == (const_arr[i] * 2.1));
+      REQUIRE((const_test(i) * 2.1) == (const_arr[i] * 2.1));
+      REQUIRE((const_arr[i] * 2.1) == (const_test[i] * 2.1));
+      REQUIRE((const_arr[i] * 2.1) == (const_test(i) * 2.1));
+
+      REQUIRE((2.1 * test[i]) == (2.1 * arr[i]));
+      REQUIRE((2.1 * test(i)) == (2.1 * arr[i]));
+      REQUIRE((2.1 * arr[i]) == (2.1 * test[i]));
+      REQUIRE((2.1 * arr[i]) == (2.1 * test(i)));
+      REQUIRE((2.1 * const_test[i]) == (2.1 * const_arr[i]));
+      REQUIRE((2.1 * const_test(i)) == (2.1 * const_arr[i]));
+      REQUIRE((2.1 * const_arr[i]) == (2.1 * const_test[i]));
+      REQUIRE((2.1 * const_arr[i]) == (2.1 * const_test(i)));
+
+      REQUIRE((arr[i] * test[i]) == (arr[i] * arr[i]));
+      REQUIRE((arr[i] * test(i)) == (arr[i] * arr[i]));
+      REQUIRE((arr[i] * arr[i]) == (arr[i] * test[i]));
+      REQUIRE((arr[i] * arr[i]) == (arr[i] * test(i)));
+      REQUIRE((const_arr[i] * const_test[i]) == (const_arr[i] * const_arr[i]));
+      REQUIRE((const_arr[i] * const_test(i)) == (const_arr[i] * const_arr[i]));
+      REQUIRE((const_arr[i] * const_arr[i]) == (const_arr[i] * const_test[i]));
+      REQUIRE((const_arr[i] * const_arr[i]) == (const_arr[i] * const_test(i)));
+    
+      
+      REQUIRE((test_comp[i] * test[i]) == (test_comp[i] * arr[i]));
+      REQUIRE((test_comp[i] * test(i)) == (test_comp[i] * arr[i]));
+      REQUIRE((test_comp[i] * const_test[i]) == (test_comp[i] * const_arr[i]));
+      REQUIRE((test_comp[i] * const_test(i)) == (test_comp[i] * const_arr[i]));
+      REQUIRE((const_test[i] * const_test[i]) == (const_test[i] * const_arr[i]));
+      REQUIRE((const_test[i] * const_test(i)) == (const_test[i] * const_arr[i]));
+
+      // /
+      REQUIRE((test[i] / 2.1) == (arr[i] / 2.1));
+      REQUIRE((test(i) / 2.1) == (arr[i] / 2.1));
+      REQUIRE((arr[i] / 2.1) == (test[i] / 2.1));
+      REQUIRE((arr[i] / 2.1) == (test(i) / 2.1));
+      REQUIRE((const_test[i] / 2.1) == (const_arr[i] / 2.1));
+      REQUIRE((const_test(i) / 2.1) == (const_arr[i] / 2.1));
+      REQUIRE((const_arr[i] / 2.1) == (const_test[i] / 2.1));
+      REQUIRE((const_arr[i] / 2.1) == (const_test(i) / 2.1));
+
+      REQUIRE((2.1 / test[i]) == (2.1 / arr[i]));
+      REQUIRE((2.1 / test(i)) == (2.1 / arr[i]));
+      REQUIRE((2.1 / arr[i]) == (2.1 / test[i]));
+      REQUIRE((2.1 / arr[i]) == (2.1 / test(i)));
+      REQUIRE((2.1 / const_test[i]) == (2.1 / const_arr[i]));
+      REQUIRE((2.1 / const_test(i)) == (2.1 / const_arr[i]));
+      REQUIRE((2.1 / const_arr[i]) == (2.1 / const_test[i]));
+      REQUIRE((2.1 / const_arr[i]) == (2.1 / const_test(i)));
+
+      REQUIRE((arr[i] / test[i]) == (arr[i] / arr[i]));
+      REQUIRE((arr[i] / test(i)) == (arr[i] / arr[i]));
+      REQUIRE((arr[i] / arr[i]) == (arr[i] / test[i]));
+      REQUIRE((arr[i] / arr[i]) == (arr[i] / test(i)));
+      REQUIRE((const_arr[i] / const_test[i]) == (const_arr[i] / const_arr[i]));
+      REQUIRE((const_arr[i] / const_test(i)) == (const_arr[i] / const_arr[i]));
+      REQUIRE((const_arr[i] / const_arr[i]) == (const_arr[i] / const_test[i]));
+      REQUIRE((const_arr[i] / const_arr[i]) == (const_arr[i] / const_test(i)));
+
+      REQUIRE((test_comp[i] / test[i]) == (test_comp[i] / arr[i]));
+      REQUIRE((test_comp[i] / test(i)) == (test_comp[i] / arr[i]));
+      REQUIRE((test_comp[i] / const_test[i]) == (test_comp[i] / const_arr[i]));
+      REQUIRE((test_comp[i] / const_test(i)) == (test_comp[i] / const_arr[i]));
+      REQUIRE((const_test[i] / const_test[i]) == (const_test[i] / const_arr[i]));
+      REQUIRE((const_test[i] / const_test(i)) == (const_test[i] / const_arr[i]));
+
+      // %
+      REQUIRE((test_int[i] % 2) == (arr_int[i] % 2));
+      REQUIRE((test_int(i) % 2) == (arr_int[i] % 2));
+      REQUIRE((arr_int[i] % 2) == (test_int[i] % 2));
+      REQUIRE((arr_int[i] % 2) == (test_int(i) % 2));
+      REQUIRE((const_test_int[i] % 2) == (const_arr_int[i] % 2));
+      REQUIRE((const_test_int(i) % 2) == (const_arr_int[i] % 2));
+      REQUIRE((const_arr_int[i] % 2) == (const_test_int[i] % 2));
+      REQUIRE((const_arr_int[i] % 2) == (const_test_int(i) % 2));
+
+      REQUIRE((2 % test_int[i]) == (2 % arr_int[i]));
+      REQUIRE((2 % test_int(i)) == (2 % arr_int[i]));
+      REQUIRE((2 % arr_int[i]) == (2 % test_int[i]));
+      REQUIRE((2 % arr_int[i]) == (2 % test_int(i)));
+      REQUIRE((2 % const_test_int[i]) == (2 % const_arr_int[i]));
+      REQUIRE((2 % const_test_int(i)) == (2 % const_arr_int[i]));
+      REQUIRE((2 % const_arr_int[i]) == (2 % const_test_int[i]));
+      REQUIRE((2 % const_arr_int[i]) == (2 % const_test_int(i)));
+
+      REQUIRE((arr_int[i] % test_int[i]) == (arr_int[i] % arr_int[i]));
+      REQUIRE((arr_int[i] % test_int(i)) == (arr_int[i] % arr_int[i]));
+      REQUIRE((arr_int[i] % arr_int[i]) == (arr_int[i] % test_int[i]));
+      REQUIRE((arr_int[i] % arr_int[i]) == (arr_int[i] % test_int(i)));
+      REQUIRE((const_arr_int[i] % const_test_int[i]) == (const_arr_int[i] % const_arr_int[i]));
+      REQUIRE((const_arr_int[i] % const_test_int(i)) == (const_arr_int[i] % const_arr_int[i]));
+      REQUIRE((const_arr_int[i] % const_arr_int[i]) == (const_arr_int[i] % const_test_int[i]));
+      REQUIRE((const_arr_int[i] % const_arr_int[i]) == (const_arr_int[i] % const_test_int(i)));
+      
+      REQUIRE((test_int_comp[i] % test_int[i]) == (test_int_comp[i] % arr_int[i]));
+      REQUIRE((test_int_comp[i] % test_int(i)) == (test_int_comp[i] % arr_int[i]));
+      REQUIRE((test_int_comp[i] % const_test_int[i]) == (test_int_comp[i] % const_arr_int[i]));
+      REQUIRE((test_int_comp[i] % const_test_int(i)) == (test_int_comp[i] % const_arr_int[i]));
+      REQUIRE((const_test_int[i] % const_test_int[i]) == (const_test_int[i] % const_arr_int[i]));
+      REQUIRE((const_test_int[i] % const_test_int(i)) == (const_test_int[i] % const_arr_int[i]));
+
+
+
+      // -
+      // REQUIRE((test[i] - 1.0) == (arr[i] - 1.0));
+      // REQUIRE((test(i) - 1.0) == (arr[i] - 1.0));
+      // *
+      // REQUIRE((test[i] * 2.1) == (arr[i] * 2.1));
+      // REQUIRE((test(i) * 2.1) == (arr[i] * 2.1));
+      // /
+      // REQUIRE((test[i] / 2.1) == (arr[i] / 2.1));
+      // REQUIRE((test(i) / 2.1) == (arr[i] / 2.1));
+      // % 
+      // REQUIRE((test_int[i] % 2) == (arr_int[i] % 2));
+      // REQUIRE((test_int(i) % 2) == (arr_int[i] % 2));
+      // ++
+      // REQUIRE((++arr_int[i]) == (++test_int[i]));
+      // REQUIRE((++arr_int[i]) == (++test_int(i)));
+      // REQUIRE((arr_int[i]++) == (test_int[i]++));
+      // REQUIRE((arr_int[i]++) == (test_int(i)++));
+      // REQUIRE((++test_int[i]) == (++arr_int[i]));
+      // REQUIRE((++test_int(i)) == (++arr_int[i]));
+      // REQUIRE((test_int[i]++) == (arr_int[i]++));
+      // REQUIRE((test_int(i)++) == (arr_int[i]++));
+      // --
+      // REQUIRE((--arr_int[i]) == (--test_int[i]));
+      // REQUIRE((--arr_int[i]) == (--test_int(i)));
+      // REQUIRE((arr_int[i]--) == (test_int[i]--));
+      // REQUIRE((arr_int[i]--) == (test_int(i)--));
+      // REQUIRE((--test_int[i]) == (--arr_int[i]));
+      // REQUIRE((--test_int(i)) == (--arr_int[i]));
+      // REQUIRE((test_int[i]--) == (arr_int[i]--));
+      // REQUIRE((test_int(i)--) == (arr_int[i]--));
+
+      // +=
+      // test[i] += 1.0;
+      // arr[i] += 1.0;
+      // REQUIRE(test[i] == arr[i]);
+      // REQUIRE(arr[i] == test[i]); // => How to do?, if rvalue && (NorM ==1) => overloading 
+
+      // -=
+      // test[i] -= 1.0;
+      // arr[i] -= 1.0;
+      // REQUIRE(test[i] == arr[i]);
+      // REQUIRE(arr[i] == test[i]); // => How to do?, if rvalue && (NorM ==1) => overloading 
+
+      // *=
+      // test[i] *= 2.1;
+      // arr[i] *= 2.1;
+      // REQUIRE(test[i] == arr[i]);
+      // REQUIRE(arr[i] == test[i]); // => How to do?, if rvalue && (NorM ==1) => overloading 
+
+      // /=
+      // test[i] /= 2.1;
+      // arr[i] /= 2.1;
+      // REQUIRE(test[i] == arr[i]);
+      // REQUIRE(arr[i] == test[i]); // => How to do?, if rvalue && (NorM ==1) => overloading 
+
+      // %=
+      // test_int[i] %= 3;
+      // arr_int[i] %= 3;
+      // REQUIRE(test_int[i] == arr_int[i]);
+      // REQUIRE(arr_int[i] == test_int[i]); // => How to do?, if rvalue && (NorM ==1) => overloading 
+
+      // ==, !=
+      // REQUIRE(test_int[i] == arr_int[i]); 
+      // REQUIRE(arr_int[i] == test_int[i]);  // => How to do?, if rvalue && (NorM ==1) => overloading 
+
+      // arr[i] += 1.0;
+      // !=
+      // REQUIRE(test[i] != arr[i]); 
+
+      // >, >=
+      // REQUIRE(test[i] < arr[i]); 
+      
+      // !=
+
+      // >
+      
+      // <
+
+      // >=
+
+      // <=
+
+      // &&
+
+      // ||
+
+      // !
+      
+      // ^
+
+      // ~
+
+      // <<
+
+      // >>
+
+
+    }
+
+    // Matrix<double, 2, 2> test2{ { {1.0, 2.0}, {3.0, 4.0}} };
+    // if(test2[0] == 1.0)
+    // {
+
+    // }
   }
 }

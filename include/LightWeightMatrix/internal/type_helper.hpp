@@ -34,6 +34,15 @@ namespace lwm
     struct are_fixed_point<T> : public is_integral<T>
     {
     };
+    template<typename T, typename... TRest>
+    struct are_arithmetic
+    {
+      static const bool value = are_arithmetic<T>::value && are_arithmetic<TRest...>::value;
+    };
+    template<typename T>
+    struct are_arithmetic<T> : public is_arithmetic<T>
+    {
+    };
     template<typename T, typename T1, typename... TRest>
     struct include_floating_point
     {
@@ -105,16 +114,14 @@ namespace lwm
       typedef typename implicit_cast<T, typename implicit_cast<T1, TRest...>::type>::type type;
     };
     template<typename T, typename T1>
-    struct implicit_cast<T, T1>
-    {
-      typedef conditional_t<
+    struct implicit_cast<T, T1> : enable_if<are_arithmetic<T, T1>::value, conditional_t<
           include_floating_point<T, T1>::value,
           implicit_cast_floating_point_t<T, T1>,
           conditional_t<
               (sizeof(T) >= sizeof(T1)),
               conditional_t<include_signed<T, T1>::value, make_signed_t<T>, T>,
-              conditional_t<include_signed<T, T1>::value, make_signed_t<T1>, T1>>>
-          type;
+              conditional_t<include_signed<T, T1>::value, make_signed_t<T1>, T1>>>>
+    {
     };
     template<typename T, typename T1, typename... TRest>
     using implicit_cast_t = typename implicit_cast<T, T1, TRest...>::type;

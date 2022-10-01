@@ -8,14 +8,18 @@
  * @copyright Copyright (c) 2022
  *
  */
-
 #pragma once
 
 #include <string.h>  //used for info
+#include <typeinfo>
 
 #include "assert.h"
 #include "internal/type_helper.hpp"
+
+// working on progress, for debugging purpose
+#include <iostream>
 #include "stdio.h"
+
 
 #define constexpr_size_t(x) lwm::const_size_t<x>()
 
@@ -24,6 +28,7 @@ namespace lwm
   using namespace internal;
   template<size_t N>
   using const_size_t = typename integral_constant<size_t, N>::type;
+
   /**
    * @brief A template based Matrix class
    *
@@ -31,7 +36,7 @@ namespace lwm
    * @tparam M rows
    * @tparam N cols
    */
-  template<typename T, size_t M, size_t N, typename = enable_if_t<(M>0)&&(N>0)>>
+  template<typename T, size_t M, size_t N, typename = enable_if_t<(M > 0) && (N > 0)>>
   class Matrix
   {
    protected:
@@ -90,6 +95,7 @@ namespace lwm
         typename = enable_if_t<is_same<const_size_t<type_::value>, type_>::value, type_>>
     void toArray(U (&out)[L], type_) const
     {
+      static_assert(is_same<const_size_t<type_::value>, type_>::value, "use const_size_t for compile_time size checking.");
       static_assert((L >= SIZE), "toArray : matrix constructor from array size error");
       static_assert(type_::value <= L, "toArray : matrix constructor from array size error");
       static_assert((L - type_::value >= SIZE), "toArray : matrix constructor from array size error");
@@ -184,32 +190,56 @@ namespace lwm
     // }
     // }
 
-    // Matrix<M, 1> row()
-    // Matrix<1, N> col()
-    // void row(value or array or Matrix<M, 1> or Matrix<1, N>)
-    // void col(value or array or Matrix<M, 1> or Matrix<1, N>)
     // if M or N => disable [] () operator by template or virtual or overloading in Matrix class
-
+    // Override or redefine [], (), when N or M == 1
 
     /**
-     * @brief Compile time matrix slice API. 
-     * 
+     * @brief Compile time, get column of Matrix
+     *
+     * @tparam c index of column
+     */
+    // template<size_t c>
+    // Matrix<T, M, 1> col() const
+    // {
+    //   static_assert( c < N, "requested column index over the size of column");
+    //   Matrix<T, M, 1> res;
+    //   for(size_t i = 0; i < M; i++)
+    //     res[i][0] = data[i][c];
+    //   return res;
+    // }
+    // /**
+    //  * @brief Compile time, get row of Matrix
+    //  *
+    //  * @tparam r index of row
+    //  */
+    // template<size_t r>
+    // Matrix<T, 1, N> row() const
+    // {
+    //   static_assert( r < M, "requested row index over the size of row");
+    //   Matrix<T, 1, N> res;
+    //   for(size_t i = 0; i < N; i++)
+    //     res[0][i] = data[r][i];
+    //   return res;
+    // }
+    /**
+     * @brief Compile time matrix slice API.
+     *
      * @tparam R size of target matrix row
      * @tparam C size of target matrix col
      * @tparam r copy row location
      * @tparam c copy col location
-     * @return Matrix<T, R, C> 
+     * @return Matrix<T, R, C>
      */
     template<size_t R, size_t C, size_t r = 0, size_t c = 0>
     Matrix<T, R, C> slice() const
     {
-      static_assert(R>=1, "row size can not be zero.");
-      static_assert(C>=1, "col size can not be zero.");
+      static_assert(R >= 1, "row size can not be zero.");
+      static_assert(C >= 1, "col size can not be zero.");
       size_static_assert<R, C, r, c>();
       Matrix<T, R, C> res;
-      for(size_t i = 0; i < R; i++)
-        for(size_t j = 0; j < C; j++)
-          res[i][j] = data[i+r][j+c];
+      for (size_t i = 0; i < R; i++)
+        for (size_t j = 0; j < C; j++)
+          res[i][j] = data[i + r][j + c];
       return res;
     }
     /**
@@ -236,7 +266,6 @@ namespace lwm
           data[i][j] = static_cast<allowed_cast_t<T, U>>(in);
     }
     Matrix(const Matrix&) = default;
-
     /**
      * @brief Construct a new Matrix object from 1D array, supports compile-time size check.
      *
@@ -454,39 +483,284 @@ namespace lwm
     template<bool isConst>
     class accessor
     {
-      conditional_t<isConst, const data_array&, data_array&> data_;
+      protected:
+      template<typename U, size_t R, size_t C, typename>
+      friend class Matrix;
 
      public:
+      typedef conditional_t<isConst, const T, T> T_;
+      conditional_t<isConst, const data_array&, data_array&> data_;
       accessor() = delete;
       explicit accessor(const accessor&) = delete;
       explicit accessor(conditional_t<isConst, const data_array&, data_array&> data) : data_{ data }
       {
       }
 
-      inline T& operator[](size_t j)
+      inline T_& operator[](size_t j)
       {
         assert(j < N);
         return data_[j];
       }
       template<typename U, typename = enable_if_t<is_same<const_size_t<U::value>, U>::value>>
-      inline T& operator[](U)
+      inline T_& operator[](U)
       {
         static_assert(U::value < N, "[] access col size error");
         return data_[U::value];
       }
-      inline T& operator()(size_t j)
+      inline T_& operator()(size_t j)
       {
         assert(j < N);
         return data_[j];
       }
       template<typename U, typename = enable_if_t<is_same<const_size_t<U::value>, U>::value>>
-      inline T& operator()(U)
+      inline T_& operator()(U)
       {
         static_assert(U::value < N, "() access col size error");
         return data_[U::value];
       }
+      template<size_t N_ = N, typename = enable_if_t<N_ == 1>>
+      inline T_& value()
+      {
+        return data_[0];
+      }
+      
+      // https://stackoverflow.com/questions/17198525/overloading-operator-to-work-on-both-right-and-left
+      // Operators when N == 1
 
-      // toArray(out, offset)
+      template<typename U, size_t N_ = N, typename = enable_if_t<is_arithmetic<U>::value && (N_ == 1)>>
+      inline bool operator==(const U& scalar) const
+      {
+        return (data_[0] == scalar);
+      }
+      template<typename U, size_t N_ = N, typename = void, typename = enable_if_t<!is_arithmetic<U>::value && (N_ == 1)>>
+      inline bool operator==(const U& scalar) const
+      {
+        return (data_[0] == scalar.data_[0]);
+      }
+      template<typename U, size_t N_ = N, typename = enable_if_t<is_arithmetic<U>::value && (N_ == 1)>>
+      inline friend U operator==(const U& scalar, const accessor& rhs)
+      {
+        return (scalar == rhs.data_[0]);
+      }
+
+      template<typename U, typename = enable_if_t<is_arithmetic<U>::value && (N == 1)>>
+      inline void operator=(const U& scalar)
+      {
+        data_[0] = scalar;
+      }
+      template<typename U, typename = enable_if_t<!is_arithmetic<U>::value && (N == 1)>>
+      inline void operator=(const U&& scalar)
+      {
+        data_[0] = scalar.data_[0];
+      }
+
+      template<typename U>
+      inline implicit_cast_t<T, U> operator+(const U& scalar) const
+      {
+        return data_[0] + scalar;
+      }
+      template<typename U>
+      inline enable_if_t<!is_arithmetic<U>::value, implicit_cast_t<T, typename U::T_>> operator+(const U& scalar) const
+      {
+        return data_[0] + scalar.data_[0];
+      }
+      template<typename U>
+      inline friend implicit_cast_t<U, T> operator+(const U& scalar, const accessor& rhs)
+      {
+        return (scalar + rhs.data_[0]);
+      }
+
+      template<typename U>
+      inline implicit_cast_t<T, U> operator-(const U& scalar) const
+      {
+        return data_[0] - scalar;
+      }
+      template<typename U>
+      inline enable_if_t<!is_arithmetic<U>::value, implicit_cast_t<T, typename U::T_>> operator-(const U& scalar) const
+      {
+        return data_[0] - scalar.data_[0];
+      }
+      template<typename U>
+      inline friend implicit_cast_t<U, T> operator-(const U& scalar, const accessor& rhs)
+      {
+        return (scalar - rhs.data_[0]);
+      }
+
+      template<typename U>
+      inline implicit_cast_t<T, U> operator*(const U& scalar) const
+      {
+        return data_[0] * scalar;
+      }
+      template<typename U>
+      inline enable_if_t<!is_arithmetic<U>::value, implicit_cast_t<T, typename U::T_>> operator*(const U& scalar) const
+      {
+        return data_[0] * scalar.data_[0];
+      }
+      template<typename U>
+      inline friend implicit_cast_t<U, T> operator*(const U& scalar, const accessor& rhs)
+      {
+        return (scalar * rhs.data_[0]);
+      }
+
+      template<typename U>
+      inline implicit_cast_t<T, U> operator/(const U& scalar) const
+      {
+        return data_[0] / scalar;
+      }
+      template<typename U>
+      inline enable_if_t<!is_arithmetic<U>::value, implicit_cast_t<T, typename U::T_>> operator/(const U& scalar) const
+      {
+        return data_[0] / scalar.data_[0];
+      }
+      template<typename U>
+      inline friend implicit_cast_t<U, T> operator/(const U& scalar, const accessor& rhs)
+      {
+        return (scalar / rhs.data_[0]);
+      }
+
+      template<typename U>
+      inline implicit_cast_t<T, U> operator%(const U& scalar) const
+      {
+        return data_[0] % scalar;
+      }
+      template<typename U>
+      inline enable_if_t<!is_arithmetic<U>::value, implicit_cast_t<T, typename U::T_>> operator%(const U& scalar) const
+      {
+        return data_[0] % scalar.data_[0];
+      }
+      template<typename U>
+      inline friend implicit_cast_t<U, T> operator%(const U& scalar, const accessor& rhs)
+      {
+        return (scalar % rhs.data_[0]);
+      }
+
+      // Verified.
+
+
+
+
+      // template<size_t N_ = N, typename = enable_if_t<N_ == 1>>
+      // inline T operator++()
+      // {
+      //   return ++data_[0];
+      // }
+      // template<size_t N_ = N, typename = enable_if_t<N_ == 1>>
+      // inline T operator++(int)
+      // {
+      //   return data_[0]++;
+      // }
+      // template<size_t N_ = N, typename = enable_if_t<N_ == 1>>
+      // inline T operator--()
+      // {
+      //   return --data_[0];
+      // }
+      // template<size_t N_ = N, typename = enable_if_t<N_ == 1>>
+      // inline T operator--(int)
+      // {
+      //   return data_[0]--;
+      // }
+
+
+
+      // template<typename U, size_t N_ = N, typename = enable_if_t<N_ == 1>>
+      // inline void operator+=(const U& scalar)
+      // {
+      //   data_[0] += scalar;
+      // }
+      // template<typename U, size_t N_ = N, typename = enable_if_t<N_ == 1>>
+      // inline void operator-=(const U& scalar)
+      // {
+      //   data_[0] -= scalar;
+      // }
+      // template<typename U, size_t N_ = N, typename = enable_if_t<N_ == 1>>
+      // inline void operator*=(const U& scalar)
+      // {
+      //   data_[0] *= scalar;
+      // }
+      // template<typename U, size_t N_ = N, typename = enable_if_t<N_ == 1>>
+      // inline void operator/=(const U& scalar)
+      // {
+      //   data_[0] /= scalar;
+      // }
+      // template<typename U, size_t N_ = N, typename = enable_if_t<N_ == 1  && are_fixed_point<T, U>::value>>
+      // inline void operator%=(const U& scalar)
+      // {
+      //   data_[0] %= scalar;
+      // }
+
+
+
+      // template<typename U, size_t N_ = N, typename = enable_if_t<N_ == 1>>
+      // inline bool operator!=(const U& scalar) const
+      // {
+      //   return (data_[0] != scalar);
+      // }
+      // template<typename U, size_t N_ = N, typename = enable_if_t<N_ == 1>>
+      // inline bool operator>(const U& scalar) const
+      // {
+      //   return (data_[0] > scalar);
+      // }
+      // template<typename U, size_t N_ = N, typename = enable_if_t<N_ == 1>>
+      // inline bool operator<(const U& scalar) const
+      // {
+      //   return (data_[0] < scalar);
+      // }
+      // template<typename U, size_t N_ = N, typename = enable_if_t<N_ == 1>>
+      // inline bool operator>=(const U& scalar) const
+      // {
+      //   return (data_[0] >= scalar);
+      // }
+      // template<typename U, size_t N_ = N, typename = enable_if_t<N_ == 1>>
+      // inline bool operator<=(const U& scalar) const
+      // {
+      //   return (data_[0] <= scalar);
+      // }
+      // template<size_t N_ = N, typename = enable_if_t<N_ == 1>>
+      // inline bool operator&&(const bool& scalar) const
+      // {
+      //   return (data_[0] && scalar);
+      // }
+      // template<size_t N_ = N, typename = enable_if_t<N_ == 1>>
+      // inline bool operator||(const bool& scalar) const
+      // {
+      //   return (data_[0] || scalar);
+      // }
+      // template<size_t N_ = N, typename = enable_if_t<N_ == 1>>
+      // inline bool operator!() const
+      // {
+      //   return (!data_[0]);
+      // }
+      // template<typename U, size_t N_ = N, typename = enable_if_t<N_ == 1 && are_fixed_point<T, U>::value>>
+      // inline implicit_cast_t<T, U> operator&(const U& scalar) const
+      // {
+      //   return (data_[0] & scalar);
+      // }
+      // template<typename U, size_t N_ = N, typename = enable_if_t<N_ == 1 && are_fixed_point<T, U>::value>>
+      // inline implicit_cast_t<T, U> operator|(const U& scalar) const
+      // {
+      //   return (data_[0] | scalar);
+      // }
+      // template<typename U, size_t N_ = N, typename = enable_if_t<N_ == 1 && are_fixed_point<T, U>::value>>
+      // inline implicit_cast_t<T, U> operator^(const U& scalar) const
+      // {
+      //   return (data_[0] ^ scalar);
+      // }
+      // template<size_t N_ = N, typename = enable_if_t<N_ == 1 && are_fixed_point<T>::value>>
+      // inline T operator~() const
+      // {
+      //   return (~data_[0]);
+      // }
+      // template<typename U, size_t N_ = N, typename = enable_if_t<N_ == 1 && are_fixed_point<T, U>::value>>
+      // inline implicit_cast_t<T, U> operator<<(const U& scalar) const
+      // {
+      //   return (data_[0] << scalar);
+      // }
+      // template<typename U, size_t N_ = N, typename = enable_if_t<N_ == 1 && are_fixed_point<T, U>::value>>
+      // inline implicit_cast_t<T, U> operator>>(const U& scalar) const
+      // {
+      //   return (data_[0] >> scalar);
+      // }
+      // Todo : ostream& << only when iostream included
     };
 
    public:

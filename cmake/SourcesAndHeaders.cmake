@@ -9,7 +9,6 @@ set(exe_sources
 
 set(headers
     include/LightWeightMatrix/internal/type_helper.hpp
-    include/LightWeightMatrix/internal/initializer_list.hpp
     include/LightWeightMatrix/internal/type_traits.hpp
     include/LightWeightMatrix/Matrix.hpp
 )
