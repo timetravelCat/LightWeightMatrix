@@ -11,11 +11,11 @@
 #pragma once
 
 #include <string.h>  //used for info
+
 #include <typeinfo>
 
 #include "assert.h"
 #include "internal/type_helper.hpp"
-
 
 #define constexpr_size_t(x) lwm::const_size_t<x>()
 
@@ -169,7 +169,6 @@ namespace lwm
       }
     }
 
-  
     // Todo : Specialization when N == 1 or M == 1
     // template<typename U, size_t L, typename = enable_if<N==1>>
     // explicit Matrix(const U (&in)[L], size_t offset = size_t(0))
@@ -199,12 +198,44 @@ namespace lwm
     template<size_t c>
     Matrix<T, M, 1> col() const
     {
-      static_assert( c < N, "requested column index over the size of column");
+      static_assert(c < N, "requested column index over the size of column");
       Matrix<T, M, 1> res;
-      for(size_t i = 0; i < M; i++)
+      for (size_t i = 0; i < M; i++)
         res.data[i][0] = data[i][c];
       return res;
     }
+    Matrix<T, M, 1> col(size_t c) const
+    {
+      assert(c < N);
+      Matrix<T, M, 1> res;
+      for (size_t i = 0; i < M; i++)
+        res.data[i][0] = data[i][c];
+      return res;
+    }
+    template<size_t c, typename U>
+    void setCol(U in)
+    {
+      static_assert(c < N, "requested column index over the size of column");
+      for (size_t i = 0; i < M; i++)
+        data[i][c] = static_cast<allowed_cast_t<T, U>>(in);
+    }
+    template<typename U>
+    void setCol(size_t c, U in)
+    {
+      assert(c < N);
+      for (size_t i = 0; i < M; i++)
+        data[i][c] = static_cast<allowed_cast_t<T, U>>(in);
+    }
+
+    // template<typename U>
+    // void setCol(size_t c, const Matrix<U, M, 1>& in)
+    // {
+      // assert(c < N);
+      // for (size_t i = 0; i < M; i++)
+      //   data[i][c] = static_cast<allowed_cast_t<T, U>>(in);
+    // }
+
+
     /**
      * @brief Compile time, get row of Matrix
      *
@@ -213,14 +244,34 @@ namespace lwm
     template<size_t r>
     Matrix<T, 1, N> row() const
     {
-      static_assert( r < M, "requested row index over the size of row");
+      static_assert(r < M, "requested row index over the size of row");
       Matrix<T, 1, N> res;
-      for(size_t i = 0; i < N; i++)
+      for (size_t i = 0; i < N; i++)
         res.data[0][i] = data[r][i];
       return res;
     }
-
-
+    Matrix<T, 1, N> row(size_t r) const
+    {
+      assert(r < M);
+      Matrix<T, 1, N> res;
+      for (size_t i = 0; i < N; i++)
+        res.data[0][i] = data[r][i];
+      return res;
+    }
+    template<size_t r, typename U>
+    void setRow(U in)
+    {
+      static_assert(r < M, "requested row index over the size of column");
+      for (size_t i = 0; i < N; i++)
+        data[r][i] = static_cast<allowed_cast_t<T, U>>(in);
+    }
+    template<typename U>
+    void setRow(size_t r, U in)
+    {
+      assert(r < M);
+      for (size_t i = 0; i < N; i++)
+        data[r][i] = static_cast<allowed_cast_t<T, U>>(in);
+    }
     /**
      * @brief Compile time matrix slice API.
      *
@@ -450,110 +501,121 @@ namespace lwm
           res.data[i][j] = static_cast<U>(data[i][j]);
       return res;
     }
-    
-    
+
     // if N or M == 1 => enable operator()(size_t i)
-    template <typename T_ = T>
-    inline const enable_if_t<M==1&&N==1, T_>& operator()() const
+    template<typename T_ = T>
+    inline const enable_if_t<M == 1 && N == 1, T_>& operator()() const
     {
       return data[0][0];
     }
-    template <typename T_ = T>
-    inline enable_if_t<M==1&&N==1, T_>& operator()()
+    template<typename T_ = T>
+    inline enable_if_t<M == 1 && N == 1, T_>& operator()()
     {
       return data[0][0];
     }
-    template <typename T_ = T>
-    inline const enable_if_t<M==1&&N!=1, T_>& operator()(size_t i) const
+    template<typename T_ = T>
+    inline const enable_if_t<M == 1 && N != 1, T_>& operator()(size_t i) const
     {
       assert(i < N);
       return data[0][i];
     }
-    template <typename T_ = T>
-    inline enable_if_t<M==1&&N!=1, T_>& operator()(size_t i)
+    template<typename T_ = T>
+    inline enable_if_t<M == 1 && N != 1, T_>& operator()(size_t i)
     {
       assert(i < N);
       return data[0][i];
     }
-    template<typename U, typename res = enable_if_t<is_same<const_size_t<U::value>, U>::value&& M==1 && N!=1, T>>
+    template<typename U, typename res = enable_if_t<is_same<const_size_t<U::value>, U>::value && M == 1 && N != 1, T>>
     inline const res& operator()(U) const
     {
       static_assert(U::value < N, "() access row size error");
       return data[0][U::value];
     }
-    template<typename U, typename res = enable_if_t<is_same<const_size_t<U::value>, U>::value&& M==1 && N!=1, T>>
+    template<typename U, typename res = enable_if_t<is_same<const_size_t<U::value>, U>::value && M == 1 && N != 1, T>>
     inline res& operator()(U)
     {
       static_assert(U::value < N, "() access row size error");
       return data[0][U::value];
     }
-    template <typename dummy = void, typename T_ = T>
-    inline const enable_if_t<M!=1&&N==1, T_>& operator()(size_t i) const
+    template<typename dummy = void, typename T_ = T>
+    inline const enable_if_t<M != 1 && N == 1, T_>& operator()(size_t i) const
     {
       assert(i < M);
       return data[i][0];
     }
-    template <typename dummy = void, typename T_ = T>
-    inline enable_if_t<M!=1&&N==1, T_>& operator()(size_t i)
+    template<typename dummy = void, typename T_ = T>
+    inline enable_if_t<M != 1 && N == 1, T_>& operator()(size_t i)
     {
       assert(i < M);
       return data[i][0];
     }
-    template<typename dummy = void, typename U, typename res = enable_if_t<is_same<const_size_t<U::value>, U>::value&& M!=1 && N==1, T>>
+    template<
+        typename dummy = void,
+        typename U,
+        typename res = enable_if_t<is_same<const_size_t<U::value>, U>::value && M != 1 && N == 1, T>>
     inline const res& operator()(U) const
     {
       static_assert(U::value < M, "() access column size error");
       return data[U::value][0];
     }
-    template<typename dummy = void, typename U, typename res = enable_if_t<is_same<const_size_t<U::value>, U>::value&& M!=1 && N==1, T>>
+    template<
+        typename dummy = void,
+        typename U,
+        typename res = enable_if_t<is_same<const_size_t<U::value>, U>::value && M != 1 && N == 1, T>>
     inline res& operator()(U)
     {
       static_assert(U::value < M, "() access column size error");
       return data[U::value][0];
     }
-    template <typename T_ = T>
-    inline const enable_if_t<M==1&&N!=1, T_>& operator[](size_t i) const
+    template<typename T_ = T>
+    inline const enable_if_t<M == 1 && N != 1, T_>& operator[](size_t i) const
     {
       assert(i < N);
       return data[0][i];
     }
-    template <typename T_ = T>
-    inline enable_if_t<M==1&&N!=1, T_>& operator[](size_t i)
+    template<typename T_ = T>
+    inline enable_if_t<M == 1 && N != 1, T_>& operator[](size_t i)
     {
       assert(i < N);
       return data[0][i];
     }
-    template<typename U, typename res = enable_if_t<is_same<const_size_t<U::value>, U>::value&& M==1 && N!=1, T>>
+    template<typename U, typename res = enable_if_t<is_same<const_size_t<U::value>, U>::value && M == 1 && N != 1, T>>
     inline const res& operator[](U) const
     {
       static_assert(U::value < N, "() access row size error");
       return data[0][U::value];
     }
-    template<typename U, typename res = enable_if_t<is_same<const_size_t<U::value>, U>::value&& M==1 && N!=1, T>>
+    template<typename U, typename res = enable_if_t<is_same<const_size_t<U::value>, U>::value && M == 1 && N != 1, T>>
     inline res& operator[](U)
     {
       static_assert(U::value < N, "() access row size error");
       return data[0][U::value];
     }
-    template <typename dummy = void, typename T_ = T>
-    inline const enable_if_t<M!=1&&N==1, T_>& operator[](size_t i) const
+    template<typename dummy = void, typename T_ = T>
+    inline const enable_if_t<M != 1 && N == 1, T_>& operator[](size_t i) const
     {
       assert(i < M);
       return data[i][0];
     }
-    template <typename dummy = void, typename T_ = T>
-    inline enable_if_t<M!=1&&N==1, T_>& operator[](size_t i)
+    template<typename dummy = void, typename T_ = T>
+    inline enable_if_t<M != 1 && N == 1, T_>& operator[](size_t i)
     {
       assert(i < M);
       return data[i][0];
     }
-    template<typename dummy = void, typename U, typename res = enable_if_t<is_same<const_size_t<U::value>, U>::value&& M!=1 && N==1, T>>
+    template<
+        typename dummy = void,
+        typename U,
+        typename res = enable_if_t<is_same<const_size_t<U::value>, U>::value && M != 1 && N == 1, T>>
     inline const res& operator[](U) const
     {
       static_assert(U::value < M, "() access column size error");
       return data[U::value][0];
     }
-    template<typename dummy = void, typename U, typename res = enable_if_t<is_same<const_size_t<U::value>, U>::value&& M!=1 && N==1, T>>
+    template<
+        typename dummy = void,
+        typename U,
+        typename res = enable_if_t<is_same<const_size_t<U::value>, U>::value && M != 1 && N == 1, T>>
     inline res& operator[](U)
     {
       static_assert(U::value < M, "() access column size error");
@@ -587,11 +649,12 @@ namespace lwm
 
       return data[i][j];
     }
+
    protected:
     template<bool isConst>
     class accessor
     {
-      protected:
+     protected:
       template<typename U, size_t R, size_t C, typename>
       friend class Matrix;
 
@@ -632,8 +695,8 @@ namespace lwm
     /**
      * @brief Accessors by [row][col], it dose not support column size checking.
      */
-    template <typename T_ = accessor<true>>
-    inline enable_if_t<M!=1&&N!=1, T_> operator[](size_t i) const
+    template<typename T_ = accessor<true>>
+    inline enable_if_t<M != 1 && N != 1, T_> operator[](size_t i) const
     {
       assert(i < M);
       return accessor<true>{ data[i] };
@@ -641,7 +704,9 @@ namespace lwm
     /**
      * @brief const Accessors by [row][col], supports compile time size check
      */
-    template<typename U, typename res = enable_if_t<is_same<const_size_t<U::value>, U>::value&& M!=1 && N!=1, accessor<true>>>
+    template<
+        typename U,
+        typename res = enable_if_t<is_same<const_size_t<U::value>, U>::value && M != 1 && N != 1, accessor<true>>>
     inline res operator[](U) const
     {
       static_assert(U::value < M, "[] access row size error");
@@ -650,8 +715,8 @@ namespace lwm
     /**
      * @brief Accessors by [row][col], it dose not support column size checking.
      */
-    template <typename T_ = accessor<false>>
-    inline enable_if_t<M!=1&&N!=1, T_> operator[](size_t i) 
+    template<typename T_ = accessor<false>>
+    inline enable_if_t<M != 1 && N != 1, T_> operator[](size_t i)
     {
       assert(i < M);
       return T_{ data[i] };
@@ -659,7 +724,9 @@ namespace lwm
     /**
      * @brief Accessors by [row][col], supports compile time size check
      */
-    template<typename U, typename res = enable_if_t<is_same<const_size_t<U::value>, U>::value&& M!=1 && N!=1, accessor<false>>>
+    template<
+        typename U,
+        typename res = enable_if_t<is_same<const_size_t<U::value>, U>::value && M != 1 && N != 1, accessor<false>>>
     inline res operator[](U)
     {
       static_assert(U::value < M, "[] access row size error");
@@ -668,8 +735,8 @@ namespace lwm
     /**
      * @brief Accessors by [row][col], it dose not support column size checking.
      */
-    template <typename T_ = accessor<true>>
-    inline enable_if_t<M!=1&&N!=1, T_> operator()(size_t i) const
+    template<typename T_ = accessor<true>>
+    inline enable_if_t<M != 1 && N != 1, T_> operator()(size_t i) const
     {
       assert(i < M);
       return accessor<true>{ data[i] };
@@ -677,7 +744,9 @@ namespace lwm
     /**
      * @brief const Accessors by [row][col], supports compile time size check
      */
-    template<typename U, typename res = enable_if_t<is_same<const_size_t<U::value>, U>::value&& M!=1 && N!=1, accessor<true>>>
+    template<
+        typename U,
+        typename res = enable_if_t<is_same<const_size_t<U::value>, U>::value && M != 1 && N != 1, accessor<true>>>
     inline res operator()(U) const
     {
       static_assert(U::value < M, "() access row size error");
@@ -686,8 +755,8 @@ namespace lwm
     /**
      * @brief Accessors by (row)(col), it dose not support column size checking.
      */
-    template <typename T_ = accessor<false>>
-    inline enable_if_t<M!=1&&N!=1, T_> operator()(size_t i)
+    template<typename T_ = accessor<false>>
+    inline enable_if_t<M != 1 && N != 1, T_> operator()(size_t i)
     {
       assert(i < M);
       return T_{ data[i] };
@@ -695,7 +764,9 @@ namespace lwm
     /**
      * @brief Accessors by (row)(col), supports compile time size check
      */
-    template<typename U, typename res = enable_if_t<is_same<const_size_t<U::value>, U>::value&& M!=1 && N!=1, accessor<false>>>
+    template<
+        typename U,
+        typename res = enable_if_t<is_same<const_size_t<U::value>, U>::value && M != 1 && N != 1, accessor<false>>>
     inline res operator()(U)
     {
       static_assert(U::value < M, "() access row size error");

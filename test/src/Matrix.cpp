@@ -186,6 +186,12 @@ TEST_CASE("Matrix", "[lwm::Matrix]")
       for (int j = 0; j < 3; j++)
         REQUIRE(matrix[i][j] == 10.0);
 
+    matrix.fill(10.0);
+    for (int i = 0; i < 2; i++)
+      for (int j = 0; j < 3; j++)
+        REQUIRE(matrix[i][j] == 10.0);
+
+
     // Compile time error
     // Matrix<uint32_t, 2, 3> matrix2;
     // matrix2.fill(10.0);
@@ -241,6 +247,14 @@ TEST_CASE("Matrix", "[lwm::Matrix]")
     for (size_t i = 0; i < 3; i++)
       REQUIRE(rowvec2[i] == matrix1[1][i]);
 
+    auto rowvec3 = matrix1.row(0);
+    auto rowvec4 = matrix1.row(1);
+    // auto rowvec2 = matrix1.row<2>();
+    for (size_t i = 0; i < 3; i++)
+      REQUIRE(rowvec3[i] == matrix1[0][i]);
+    for (size_t i = 0; i < 3; i++)
+      REQUIRE(rowvec4[i] == matrix1[1][i]);
+
     auto colvec1 = matrix1.col<0>();
     auto colvec2 = matrix1.col<1>();
     auto colvec3 = matrix1.col<2>();
@@ -250,6 +264,17 @@ TEST_CASE("Matrix", "[lwm::Matrix]")
       REQUIRE(colvec1[i] == matrix1[i][0]);
       REQUIRE(colvec2[i] == matrix1[i][1]);
       REQUIRE(colvec3[i] == matrix1[i][2]);
+    }
+
+    auto colvec4 = matrix1.col(0);
+    auto colvec5 = matrix1.col(1);
+    auto colvec6 = matrix1.col(2);
+    // auto colvec3 = matrix1.col<3>();
+    for (size_t i = 0; i < 2; i++)
+    {
+      REQUIRE(colvec4[i] == matrix1[i][0]);
+      REQUIRE(colvec5[i] == matrix1[i][1]);
+      REQUIRE(colvec6[i] == matrix1[i][2]);
     }
   }
   SECTION("Vector Accessor & Operator TEST when N==1 or M == 1")
