@@ -527,6 +527,7 @@ namespace lwm
       // https://stackoverflow.com/questions/17198525/overloading-operator-to-work-on-both-right-and-left
       // Operators when N == 1
 
+      // Logical Operators
       template<typename U, size_t N_ = N, typename = enable_if_t<is_arithmetic<U>::value && (N_ == 1)>>
       inline bool operator==(const U& scalar) const
       {
@@ -538,22 +539,39 @@ namespace lwm
         return (data_[0] == scalar.data_[0]);
       }
       template<typename U, size_t N_ = N, typename = enable_if_t<is_arithmetic<U>::value && (N_ == 1)>>
-      inline friend U operator==(const U& scalar, const accessor& rhs)
+      inline friend bool operator==(const U& scalar, const accessor& rhs)
       {
         return (scalar == rhs.data_[0]);
       }
+      template<typename U, size_t N_ = N, typename = enable_if_t<is_arithmetic<U>::value && (N_ == 1)>>
+      inline bool operator!=(const U& scalar) const
+      {
+        return (data_[0] != scalar);
+      }
+      template<typename U, size_t N_ = N, typename = void, typename = enable_if_t<!is_arithmetic<U>::value && (N_ == 1)>>
+      inline bool operator!=(const U& scalar) const
+      {
+        return (data_[0] != scalar.data_[0]);
+      }
+      template<typename U, size_t N_ = N, typename = enable_if_t<is_arithmetic<U>::value && (N_ == 1)>>
+      inline friend bool operator!=(const U& scalar, const accessor& rhs)
+      {
+        return (scalar != rhs.data_[0]);
+      }
 
+      // Assignment operators
       template<typename U, typename = enable_if_t<is_arithmetic<U>::value && (N == 1)>>
       inline void operator=(const U& scalar)
       {
         data_[0] = scalar;
       }
-      template<typename U, typename = enable_if_t<!is_arithmetic<U>::value && (N == 1)>>
-      inline void operator=(const U&& scalar)
+      template<typename U, typename dummy = void, typename = enable_if_t<!is_arithmetic<U>::value && (N == 1)>>
+      inline void operator=(const U& scalar)
       {
         data_[0] = scalar.data_[0];
       }
 
+      // Arithmetic operators
       template<typename U>
       inline implicit_cast_t<T, U> operator+(const U& scalar) const
       {
@@ -634,33 +652,29 @@ namespace lwm
         return (scalar % rhs.data_[0]);
       }
 
+      template<size_t N_ = N, typename = enable_if_t<N_ == 1>>
+      inline T_& operator++()
+      {
+        return (++data_[0]);
+      }
+      template<size_t N_ = N, typename = enable_if_t<N_ == 1>>
+      inline T_ operator++(int)
+      {
+        return (data_[0]++);
+      }
+      template<size_t N_ = N, typename = enable_if_t<N_ == 1>>
+      inline T_& operator--()
+      {
+        return (--data_[0]);
+      }
+      template<size_t N_ = N, typename = enable_if_t<N_ == 1>>
+      inline T_ operator--(int)
+      {
+        return (data_[0]--);
+      }
+
       // Verified.
-
-
-
-
-      // template<size_t N_ = N, typename = enable_if_t<N_ == 1>>
-      // inline T operator++()
-      // {
-      //   return ++data_[0];
-      // }
-      // template<size_t N_ = N, typename = enable_if_t<N_ == 1>>
-      // inline T operator++(int)
-      // {
-      //   return data_[0]++;
-      // }
-      // template<size_t N_ = N, typename = enable_if_t<N_ == 1>>
-      // inline T operator--()
-      // {
-      //   return --data_[0];
-      // }
-      // template<size_t N_ = N, typename = enable_if_t<N_ == 1>>
-      // inline T operator--(int)
-      // {
-      //   return data_[0]--;
-      // }
-
-
+      // 
 
       // template<typename U, size_t N_ = N, typename = enable_if_t<N_ == 1>>
       // inline void operator+=(const U& scalar)

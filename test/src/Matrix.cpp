@@ -298,6 +298,23 @@ TEST_CASE("Matrix", "[lwm::Matrix]")
       REQUIRE(const_arr[i] == test[i]);
       REQUIRE(const_arr[i] == const_test[i]);
 
+      REQUIRE((test_comp[i] != static_cast<double>(i+1)) == false);
+      REQUIRE((const_test_comp[i] != static_cast<double>(i+1)) == false);
+      REQUIRE((test[i] != test_comp[i]) == false);
+      REQUIRE((test[i] != const_test_comp[i]) == false);
+      REQUIRE((const_test_comp[i] != const_test[i]) == false);
+      REQUIRE((const_test_comp[i] != test_comp[i]) == false);
+      REQUIRE((test[i] != arr[i]) == false);
+      REQUIRE((test[i] != const_arr[i]) == false);
+      REQUIRE((test_comp[i] != arr[i]) == false);
+      REQUIRE((test_comp[i] != const_arr[i]) == false);
+      REQUIRE((static_cast<double>(i+1) != test[i]) == false);
+      REQUIRE((static_cast<double>(i+1) != const_test[i]) == false);
+      REQUIRE((arr[i] != test[i]) == false);
+      REQUIRE((arr[i] != const_test[i]) == false);
+      REQUIRE((const_arr[i] != test[i]) == false);
+      REQUIRE((const_arr[i] != const_test[i]) == false);
+
       // = 
       (test_comp[i] = static_cast<double>(i+1));
       REQUIRE(test_comp[i] == static_cast<double>(i+1));
@@ -309,8 +326,9 @@ TEST_CASE("Matrix", "[lwm::Matrix]")
       REQUIRE(test[i] == arr[i]);
       test[i] = const_arr[i];
       REQUIRE(test[i] == const_arr[i]);
-      
+
       arr[i] = test[i].value();
+      // arr[i] = test[i]; -> not possible.
       REQUIRE(test[i] == arr[i]);
       arr[i] = const_test[i].value();
       REQUIRE(test[i] == const_arr[i]);
@@ -494,6 +512,18 @@ TEST_CASE("Matrix", "[lwm::Matrix]")
       REQUIRE((const_test_int[i] % const_test_int[i]) == (const_test_int[i] % const_arr_int[i]));
       REQUIRE((const_test_int[i] % const_test_int(i)) == (const_test_int[i] % const_arr_int[i]));
 
+      // ++, --
+      REQUIRE((test[i]++) == (arr[i]++));
+      REQUIRE((test(i)++) == (arr[i]++));
+      REQUIRE((arr[i]++) == (test[i]++));
+      REQUIRE((arr[i]++) == (test(i)++));
+      // REQUIRE((const_test[i]++) == (arr[i]++));
+      // REQUIRE((arr[i]++) == (const_test[i]++));
+
+      REQUIRE((++test[i]) == (++arr[i]));
+      REQUIRE((++test(i)) == (++arr[i]));
+      REQUIRE((++arr[i]) == (++test[i]));
+      REQUIRE((++arr[i]) == (++test(i)));
 
 
       // -
