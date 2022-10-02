@@ -68,7 +68,7 @@ namespace lwm
     static Matrix Identity()
     {
       Matrix res;
-      for (size_t i = 0; i < min<size_t, M, N>::value; i++)
+      for (size_t i = 0; i < internal::min<size_t, M, N>::value; i++)
         res.data[i][i] = static_cast<T>(1);
       return res;
     }
@@ -254,6 +254,67 @@ namespace lwm
         for (size_t j = 0; j < N; j++)
           res.data[i][j] = data[i][j] / other[i][j];
       return res;
+    }
+
+    template<typename T_ = T>
+    enable_if_t<is_signed<T_>::value, Matrix<T_, M, N>> abs() const
+    {
+      Matrix<T_, M, N> res;
+      for (size_t i = 0; i < M; i++)
+        for (size_t j = 0; j < N; j++)
+          res.data[i][j] = fabs(data[i][j]);
+      return res;
+    }
+    template<typename T_ = T>
+    enable_if_t<are_floating_point<T_>::value, bool> isAllNan() const
+    {
+      for (size_t i = 0; i < M; i++)
+        for (size_t j = 0; j < N; j++)
+          if (!isnan(data[i][j]))
+            return false;
+      return true;
+    }
+    template<typename T_ = T>
+    enable_if_t<are_floating_point<T_>::value, bool> isAnyNan() const
+    {
+      for (size_t i = 0; i < M; i++)
+        for (size_t j = 0; j < N; j++)
+          if (isnan(data[i][j]))
+            return true;
+      return false;
+    }
+
+    T max() const
+    {
+      T max_val = data[0][0];
+      for (size_t i = 0; i < M; i++)
+      {
+        for (size_t j = 0; j < N; j++)
+        {
+          T val = data[i][j];
+          if (val > max_val)
+          {
+            max_val = val;
+          }
+        }
+      }
+      return max_val;
+    }
+    T min() const
+    {
+      T min_val = data[0][0];
+      for (size_t i = 0; i < M; i++)
+      {
+        for (size_t j = 0; j < N; j++)
+        {
+          T val = data[i][j];
+          if (val < min_val)
+          {
+            min_val = val;
+          }
+        }
+      }
+      return min_val;
     }
 
     /**

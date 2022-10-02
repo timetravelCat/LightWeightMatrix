@@ -508,5 +508,26 @@ TEST_CASE("Matrix", "[lwm::Matrix]")
     REQUIRE(mat____[0][1] == 4.0);
     REQUIRE(mat____[1][0] == 4.0);
     REQUIRE(mat____[1][1] == 4.0);
+
+    Matrix<int, 2, 2> test_mat{{-1, 3, 4, 2}};
+    Matrix<int, 2, 2> test_mat_abs = test_mat.abs();
+    REQUIRE(test_mat_abs[0][0] == 1);
+    REQUIRE(test_mat_abs[0][1] == 3);
+    REQUIRE(test_mat_abs[1][0] == 4);
+    REQUIRE(test_mat_abs[1][1] == 2);
+    REQUIRE(test_mat.max() == 4);
+    REQUIRE(test_mat.min() == -1);
+
+    Matrix<float, 2, 2> test_mat_nan1{{-1.0f, 2.0f, 4.0f, 2.0f}};
+    REQUIRE(test_mat_nan1.max() == 4.0f);
+    REQUIRE(test_mat_nan1.min() == -1.0f);
+    REQUIRE(!test_mat_nan1.isAllNan());
+    test_mat_nan1[0][0] = NAN;
+    REQUIRE(!test_mat_nan1.isAllNan());
+    REQUIRE(test_mat_nan1.isAnyNan());
+
+    Matrix<float, 2, 2> test_mat_nan2{{-NAN, NAN, NAN, NAN}};
+    REQUIRE(test_mat_nan2.isAllNan());
+    REQUIRE(test_mat_nan2.isAnyNan());
   }
 }
