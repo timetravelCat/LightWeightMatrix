@@ -469,64 +469,64 @@ TEST_CASE("Matrix", "[lwm::Matrix]")
 
     Matrix<int, 2, 1> mat__l1{ { 1, 2 } };
     Matrix<double, 1, 2> mat__l2{ { 3.0, 4.0 } };
-    Matrix<double, 2, 2> mat_ = mat_l1 * mat_l2;
-    REQUIRE(mat_[0][0] == 1 * 3.0);
-    REQUIRE(mat_[0][1] == 1 * 4.0);
-    REQUIRE(mat_[1][0] == 2 * 3.0);
-    REQUIRE(mat_[1][1] == 2 * 4.0);
+    Matrix<double, 2, 2> mat_ = (mat__l1 * mat__l2);
+    REQUIRE(mat_[0][0] == 1.0 * 3.0);
+    REQUIRE(mat_[0][1] == 1.0 * 4.0);
+    REQUIRE(mat_[1][0] == 2.0 * 3.0);
+    REQUIRE(mat_[1][1] == 2.0 * 4.0);
 
     Matrix<int, 2, 1> mat___l1{ { 1.0, 2.0 } };
     Matrix<double, 1, 2> mat___l2{ { 3.0, 4.0 } };
-    Matrix<float, 2, 2> mat__ = mat_l1 * mat_l2;
+    Matrix<float, 2, 2> mat__ = (mat___l1 * mat___l2).cast<float>();
     REQUIRE(mat__[0][0] == static_cast<float>(1.0 * 3.0));
     REQUIRE(mat__[0][1] == static_cast<float>(1.0 * 4.0));
     REQUIRE(mat__[1][0] == static_cast<float>(2.0 * 3.0));
     REQUIRE(mat__[1][1] == static_cast<float>(2.0 * 4.0));
 
-    // mat__ += 1.0;
-    // mat__ += Matrix<double, 2,2>::Constant(1.0);
-    mat__ = 1.0 + mat__;
-    REQUIRE(mat__[0][0] == static_cast<float>(1.0 * 3.0) + 1.0);
-    REQUIRE(mat__[0][1] == static_cast<float>(1.0 * 4.0) + 1.0);
-    REQUIRE(mat__[1][0] == static_cast<float>(2.0 * 3.0) + 1.0);
-    REQUIRE(mat__[1][1] == static_cast<float>(2.0 * 4.0) + 1.0);
+    // mat__ += 1.0f;
+    // mat__ += Matrix<double, 2,2>::Constant(1.0).cast<float>();
+    mat__ = 1.0f + mat__;
+    REQUIRE(mat__[0][0] == static_cast<float>(1.0 * 3.0 + 1.0));
+    REQUIRE(mat__[0][1] == static_cast<float>(1.0 * 4.0 + 1.0));
+    REQUIRE(mat__[1][0] == static_cast<float>(2.0 * 3.0 + 1.0));
+    REQUIRE(mat__[1][1] == static_cast<float>(2.0 * 4.0 + 1.0));
 
-    // mat__ -= 1.0;
-    mat__ -= Matrix<double, 2, 2>::Constant(1.0);
+    // mat__ -= 1.0f;
+    mat__ -= Matrix<double, 2, 2>::Constant(1.0).cast<float>();
     REQUIRE(mat__[0][0] == static_cast<float>(1.0 * 3.0));
     REQUIRE(mat__[0][1] == static_cast<float>(1.0 * 4.0));
     REQUIRE(mat__[1][0] == static_cast<float>(2.0 * 3.0));
     REQUIRE(mat__[1][1] == static_cast<float>(2.0 * 4.0));
 
-    // mat__ *= 2.0;
-    // mat__ *= Matrix<double, 2,2>::Identity()*2.0;
-    mat__ *= 2.0 * Matrix<double, 2, 2>::Identity();
-    REQUIRE(mat__[0][0] == static_cast<float>(1.0 * 3.0) * 2.0);
-    REQUIRE(mat__[0][1] == static_cast<float>(1.0 * 4.0) * 2.0);
-    REQUIRE(mat__[1][0] == static_cast<float>(2.0 * 3.0) * 2.0);
-    REQUIRE(mat__[1][1] == static_cast<float>(2.0 * 4.0) * 2.0);
+    // mat__ *= 2.0f;
+    // mat__ *= Matrix<double, 2,2>::Identity().cast<float>()*2.0f;
+    mat__ *= 2.0f * Matrix<double, 2, 2>::Identity().cast<float>();
+    REQUIRE(mat__[0][0] == static_cast<float>(1.0 * 3.0* 2.0));
+    REQUIRE(mat__[0][1] == static_cast<float>(1.0 * 4.0* 2.0));
+    REQUIRE(mat__[1][0] == static_cast<float>(2.0 * 3.0* 2.0));
+    REQUIRE(mat__[1][1] == static_cast<float>(2.0 * 4.0* 2.0));
 
-    mat__ /= 2.0;
+    mat__ /= 2.0f;
     REQUIRE(mat__[0][0] == static_cast<float>(1.0 * 3.0));
     REQUIRE(mat__[0][1] == static_cast<float>(1.0 * 4.0));
     REQUIRE(mat__[1][0] == static_cast<float>(2.0 * 3.0));
     REQUIRE(mat__[1][1] == static_cast<float>(2.0 * 4.0));
 
     Matrix<float, 2, 2> mat___ = Matrix<double,2,2>::Constant(2.0);
-    Matrix<float, 2, 2> mat____ = mat___.elementWiseMultiply(Matrix<double, 2, 2>::Constant(2.0));
-    REQUIRE(mat____[0][0] == 4.0);
-    REQUIRE(mat____[0][1] == 4.0);
-    REQUIRE(mat____[1][0] == 4.0);
-    REQUIRE(mat____[1][1] == 4.0);
+    Matrix<float, 2, 2> mat____ = mat___.elementWiseMultiply(Matrix<double, 2, 2>::Constant(2.0).cast<float>());
+    REQUIRE(mat____[0][0] == 4.0f);
+    REQUIRE(mat____[0][1] == 4.0f);
+    REQUIRE(mat____[1][0] == 4.0f);
+    REQUIRE(mat____[1][1] == 4.0f);
 
-    Matrix<int, 2, 2> test_mat{{-1, 3, 4, 2}};
-    Matrix<int, 2, 2> test_mat_abs = test_mat.abs();
-    REQUIRE(test_mat_abs[0][0] == 1);
-    REQUIRE(test_mat_abs[0][1] == 3);
-    REQUIRE(test_mat_abs[1][0] == 4);
-    REQUIRE(test_mat_abs[1][1] == 2);
-    REQUIRE(test_mat.max() == 4);
-    REQUIRE(test_mat.min() == -1);
+    Matrix<double, 2, 2> test_mat{{-1.0, 3.0, 4.0, 2.0}};
+    Matrix<double, 2, 2> test_mat_abs = test_mat.abs();
+    REQUIRE(test_mat_abs[0][0] == 1.0);
+    REQUIRE(test_mat_abs[0][1] == 3.0);
+    REQUIRE(test_mat_abs[1][0] == 4.0);
+    REQUIRE(test_mat_abs[1][1] == 2.0);
+    REQUIRE(test_mat.max() == 4.0);
+    REQUIRE(test_mat.min() == -1.0);
 
     Matrix<float, 2, 2> test_mat_nan1{{-1.0f, 2.0f, 4.0f, 2.0f}};
     REQUIRE(test_mat_nan1.max() == 4.0f);
