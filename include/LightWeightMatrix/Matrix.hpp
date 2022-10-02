@@ -14,8 +14,8 @@
 #include <float.h>
 #include <math.h>
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "Common.hpp"
 #include "internal/type_helper.hpp"
@@ -54,12 +54,12 @@ namespace lwm
      * @return Matrix [M][N] initialized with Zero
      */
     static Matrix Zero();
-    template<typename T_ = T>
     /**
      * @brief returns NaN Matrix.
      *
      * @return Matrix [M][N] initialized with NaN, enabled in only floating types.
      */
+    template<typename T_ = T>
     static enable_if_t<is_floating_point<T_>::value, Matrix> NaN();
     /**
      * @brief returns Matrix filled with value.
@@ -114,12 +114,12 @@ namespace lwm
      */
     template<typename U>
     Matrix<implicit_cast_t<T, U>, M, N> elementWiseMultiply(const Matrix<U, M, N>& other) const;
-    template<typename U>
     /**
      * @brief Returns element wise divide between matrix.
      *
      * @return Matrix [M][N] with implicit casted between input matrix.
      */
+    template<typename U>
     Matrix<implicit_cast_t<T, U>, M, N> elementWiseDivide(const Matrix<U, M, N>& other) const;
     /**
      * @brief Copy to 1D array Type, copy from signed type to unsigned is not allowed.
@@ -317,6 +317,10 @@ namespace lwm
     // {
     //     char str[func(M*N)]
     // };
+    // [][][][] //4자리수까지 지원? => point 까지 포함되어있을 수 있음.
+    // []1 \t 2\ t3 \t4 \n
+    // []1 \t 2\ t3 \t4 \n
+    // []1 \t 2\ t3 \t4 \n\0
 
     /**
      * @brief Construct a new Matrix object from 1D array.
@@ -540,6 +544,94 @@ namespace lwm
     template<size_t R, size_t C, size_t r, size_t c>
     static void size_static_assert();
   };
+
+  template<size_t M, size_t N>
+  using Matrixi = Matrix<int, M, N>;
+  template<size_t M, size_t N>
+  using Matrixui = Matrix<uint32_t, M, N>;
+  template<size_t M, size_t N>
+  using Matrixf = Matrix<float, M, N>;
+  template<size_t M, size_t N>
+  using Matrixd = Matrix<double, M, N>;
+  template<size_t M, size_t N>
+  using Matrixld = Matrix<long double, M, N>;
+
+  template<typename T, size_t N>
+  using SquareMatrix = Matrix<T, N, N>;
+  template<size_t N>
+  using SquareMatrixi = SquareMatrix<int, N>;
+  template<size_t N>
+  using SquareMatrixui = SquareMatrix<uint32_t, N>;
+  template<size_t N>
+  using SquareMatrixf = SquareMatrix<float, N>;
+  template<size_t N>
+  using SquareMatrixd = SquareMatrix<double, N>;
+  template<size_t N>
+  using SquareMatrixld = SquareMatrix<long double, N>;
+
+  template<typename T, size_t N>
+  using RowVector = Matrix<T, 1, N>;
+  template<size_t N>
+  using RowVectori = RowVector<int, N>;
+  template<size_t N>
+  using RowVectorui = RowVector<uint32_t, N>;
+  template<size_t N>
+  using RowVectorf = RowVector<float, N>;
+  template<size_t N>
+  using RowVectord = RowVector<double, N>;
+  template<size_t N>
+  using RowVectorld = RowVector<long double, N>;
+
+  template<typename T, size_t N>
+  using ColVector = Matrix<T, N, 1>;
+  template<size_t N>
+  using ColVectori = ColVector<int, N>;
+  template<size_t N>
+  using ColVectorui = ColVector<uint32_t, N>;
+  template<size_t N>
+  using ColVectorf = ColVector<float, N>;
+  template<size_t N>
+  using ColVectord = ColVector<double, N>;
+  template<size_t N>
+  using ColVectorld = ColVector<long double, N>;
+
+  template<typename T, size_t N>
+  using Vector = ColVector<T, N>;
+  template<size_t N>
+  using Vectori = Vector<int, N>;
+  template<size_t N>
+  using Vectorui = Vector<uint32_t, N>;
+  template<size_t N>
+  using Vectorf = Vector<float, N>;
+  template<size_t N>
+  using Vectord = Vector<double, N>;
+  template<size_t N>
+  using Vectorld = Vector<long double, N>;
+
+  template<typename T>
+  using RotationMatrix = SquareMatrix<T, 3>;
+  using RotationMatrixi = RotationMatrix<int>;
+  using RotationMatrixui = RotationMatrix<uint32_t>;
+  using RotationMatrixf = RotationMatrix<float>;
+  using RotationMatrixd = RotationMatrix<double>;
+  using RotationMatrixld = RotationMatrix<long double>;
+
+  template<typename T>
+  using DirectionCosineMatrix = RotationMatrix<T>;
+  using DirectionCosineMatrixi = DirectionCosineMatrix<int>;
+  using DirectionCosineMatrixui = DirectionCosineMatrix<uint32_t>;
+  using DirectionCosineMatrixf = DirectionCosineMatrix<float>;
+  using DirectionCosineMatrixd = DirectionCosineMatrix<double>;
+  using DirectionCosineMatrixld = DirectionCosineMatrix<long double>;
+
+  template<typename T>
+  using DCM = DirectionCosineMatrix<T>;
+  using DCMi = DCM<int>;
+  using DCMui = DCM<uint32_t>;
+  using DCMf = DCM<float>;
+  using DCMd = DCM<double>;
+  using DCMld = DCM<long double>;
+
 };  // namespace lwm
 
 #include "internal/_MatrixAccessors.hpp"
