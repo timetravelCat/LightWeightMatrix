@@ -16,4 +16,5 @@ set(headers
 set(test_sources
   src/test_type_helper.cpp
   src/Matrix.cpp
+  src/Common.cpp
 )

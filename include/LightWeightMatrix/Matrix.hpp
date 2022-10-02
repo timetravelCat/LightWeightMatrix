@@ -10,13 +10,14 @@
  */
 #pragma once
 
-#include <string.h>  //used for info
+#include <assert.h>
+#include <float.h>
+#include <math.h>
+#include <stdio.h>
+#include <string.h>
 
-#include <typeinfo>
-
-#include "assert.h"
+#include "Common.hpp"
 #include "internal/type_helper.hpp"
-#include "math.h"
 
 #define constexpr_size_t(x) lwm::const_size_t<x>()
 
@@ -47,35 +48,221 @@ namespace lwm
     Matrix() = default;
 
     // static methods of constants, starts with Upper case.
-    static Matrix Zero(){
+    static Matrix Zero()
+    {
       return Matrix();
     }
-    template<typename T_ = T> 
-    static enable_if_t<is_floating_point<T_>::value, Matrix> NaN(){
-        Matrix res;
-        res.fill(NAN);
-        return res;
+    template<typename T_ = T>
+    static enable_if_t<is_floating_point<T_>::value, Matrix> NaN()
+    {
+      Matrix res;
+      res.fill(NAN);
+      return res;
     }
-    static Matrix Constant(T value){
+    static Matrix Constant(T value)
+    {
       Matrix res;
       res.fill(value);
       return res;
     }
-    static Matrix Identity(){
+    static Matrix Identity()
+    {
       Matrix res;
-      for(size_t i = 0; i < min<size_t, M, N>::value; i++)
+      for (size_t i = 0; i < min<size_t, M, N>::value; i++)
         res.data[i][i] = static_cast<T>(1);
       return res;
     }
-    
 
+    /**
+     * @brief Mathmatical operations
+     */
+    template<typename U, size_t P>
+    Matrix<implicit_cast_t<T, U>, M, P> operator*(const Matrix<U, N, P>& other) const
+    {
+      Matrix<implicit_cast_t<T, U>, M, P> res;
+      for (size_t i = 0; i < M; i++)
+        for (size_t k = 0; k < P; k++)
+          for (size_t j = 0; j < N; j++)
+            res.data[i][k] += data[i][j] * other.data[j][k];
+      return res;
+    }
+    template<typename U, size_t P>
+    void operator*=(const Matrix<U, N, P>& other)
+    {
+      (*this) = (*this) * other;
+    }
+    template<typename U>
+    Matrix<implicit_cast_t<T, U>, M, N> operator*(U other) const
+    {
+      Matrix<implicit_cast_t<T, U>, M, N> res;
+      for (size_t i = 0; i < M; i++)
+        for (size_t j = 0; j < N; j++)
+          res.data[i][j] = data[i][j] * other;
+      return res;
+    }
+    template<typename U>
+    void operator*=(U other)
+    {
+      for (size_t i = 0; i < M; i++)
+        for (size_t j = 0; j < N; j++)
+          data[i][j] = data[i][j] * other;
+    }
+    template<typename U>
+    friend Matrix<implicit_cast_t<T, U>, M, N> operator*(U other, const Matrix& m)
+    {
+      Matrix<implicit_cast_t<T, U>, M, N> res;
+      for (size_t i = 0; i < M; i++)
+        for (size_t j = 0; j < N; j++)
+          res.data[i][j] = m.data[i][j] * other;
+      return res;
+    }
 
+    template<typename U>
+    Matrix<implicit_cast_t<T, U>, M, N> operator/(U other) const
+    {
+      Matrix<implicit_cast_t<T, U>, M, N> res;
+      for (size_t i = 0; i < M; i++)
+        for (size_t j = 0; j < N; j++)
+          res.data[i][j] = data[i][j] / other;
+      return res;
+    }
+    template<typename U>
+    void operator/=(U other)
+    {
+      for (size_t i = 0; i < M; i++)
+        for (size_t j = 0; j < N; j++)
+          data[i][j] /= other;
+    }
 
+    template<typename U>
+    Matrix<implicit_cast_t<T, U>, M, N> operator+(const Matrix<U, M, N>& other) const
+    {
+      Matrix<implicit_cast_t<T, U>, M, N> res;
+      for (size_t i = 0; i < M; i++)
+        for (size_t j = 0; j < N; j++)
+          res.data[i][j] = data[i][j] + other.data[i][j];
+      return res;
+    }
+    template<typename U>
+    void operator+=(const Matrix<U, M, N>& other)
+    {
+      for (size_t i = 0; i < M; i++)
+        for (size_t j = 0; j < N; j++)
+          data[i][j] += other.data[i][j];
+    }
+    template<typename U>
+    Matrix<implicit_cast_t<T, U>, M, N> operator+(U other) const
+    {
+      Matrix<implicit_cast_t<T, U>, M, N> res;
+      for (size_t i = 0; i < M; i++)
+        for (size_t j = 0; j < N; j++)
+          res.data[i][j] = data[i][j] + other;
+      return res;
+    }
+    template<typename U>
+    void operator+=(U other)
+    {
+      for (size_t i = 0; i < M; i++)
+        for (size_t j = 0; j < N; j++)
+          data[i][j] += other;
+    }
+    template<typename U>
+    friend Matrix<implicit_cast_t<T, U>, M, N> operator+(U other, const Matrix& m)
+    {
+      Matrix<implicit_cast_t<T, U>, M, N> res;
+      for (size_t i = 0; i < M; i++)
+        for (size_t j = 0; j < N; j++)
+          res[i][j] = m.data[i][j] + other;
+      return res;
+    }
 
+    template<typename U>
+    Matrix<implicit_cast_t<T, U>, M, N> operator-(const Matrix<U, M, N>& other) const
+    {
+      Matrix<implicit_cast_t<T, U>, M, N> res;
+      for (size_t i = 0; i < M; i++)
+        for (size_t j = 0; j < N; j++)
+          res.data[i][j] = data[i][j] - other.data[i][j];
+      return res;
+    }
+    template<typename U>
+    void operator-=(const Matrix<U, M, N>& other)
+    {
+      for (size_t i = 0; i < M; i++)
+        for (size_t j = 0; j < N; j++)
+          data[i][j] -= other.data[i][j];
+    }
+    template<typename U>
+    Matrix<implicit_cast_t<T, U>, M, N> operator-(U other) const
+    {
+      Matrix<implicit_cast_t<T, U>, M, N> res;
+      for (size_t i = 0; i < M; i++)
+        for (size_t j = 0; j < N; j++)
+          res.data[i][j] = data[i][j] - other;
+      return res;
+    }
+    template<typename U>
+    void operator-=(U other)
+    {
+      for (size_t i = 0; i < M; i++)
+        for (size_t j = 0; j < N; j++)
+          data[i][j] -= other;
+    }
+    template<typename U>
+    friend Matrix<implicit_cast_t<T, U>, M, N> operator-(U other, const Matrix& m)
+    {
+      Matrix<implicit_cast_t<T, U>, M, N> res;
+      for (size_t i = 0; i < M; i++)
+        for (size_t j = 0; j < N; j++)
+          res.data[i][j] = other - m.data[i][j];
+      return res;
+    }
 
-    // Hadamard(elementwise) product / elementwise devide
-    // operator* / operator+ / operator- / += / -= / *= / ...
-    // get info string / transpose
+    template<typename U>
+    bool operator==(const Matrix<U, M, N>& other) const
+    {
+      for (size_t i = 0; i < M; i++)
+        for (size_t j = 0; j < N; j++)
+          if (!isSame(data[i][j], other.data[i][j]))
+            return false;
+      return true;
+    }
+    template<typename U>
+    bool operator!=(const Matrix<U, M, N>& other) const
+    {
+      for (size_t i = 0; i < M; i++)
+        for (size_t j = 0; j < N; j++)
+          if (!isSame(data[i][j], other.data[i][j]))
+            return true;
+      return false;
+    }
+
+    template<typename U>
+    Matrix<implicit_cast_t<T, U>, M, N> elementWiseMultiply(const Matrix<U, M, N>& other) const
+    {
+      Matrix<implicit_cast_t<T, U>, M, N> res;
+      for (size_t i = 0; i < M; i++)
+        for (size_t j = 0; j < N; j++)
+          res.data[i][j] = other[i][j] * data[i][j];
+      return res;
+    }
+    template<typename U>
+    Matrix<implicit_cast_t<T, U>, M, N> elementWiseDivide(const Matrix<U, M, N>& other) const
+    {
+      Matrix<implicit_cast_t<T, U>, M, N> res;
+      for (size_t i = 0; i < M; i++)
+        for (size_t j = 0; j < N; j++)
+          res.data[i][j] = data[i][j] / other[i][j];
+      return res;
+    }
+
+    /**
+     * @brief get info char array
+     */
+    // struct MatrixInfo
+    // {
+    //     // char info[func(M*N)]
+    // };
 
     /**
      * @brief Copy to 1D array Type.
@@ -108,19 +295,14 @@ namespace lwm
      * @tparam L Length of array.
      * @tparam type_ enabled only if unsigned constexpr_cast_size_t type.
      */
-    template<
-        typename U,
-        size_t L,
-        typename type_,
-        typename = enable_if_t<is_same<const_size_t<type_::value>, type_>::value, type_>>
-    void toArray(U (&out)[L], type_) const
+    template<size_t offset, typename U, size_t L>
+    void toArray(U (&out)[L]) const
     {
-      static_assert(is_same<const_size_t<type_::value>, type_>::value, "use const_size_t for compile_time size checking.");
       static_assert((L >= SIZE), "toArray : matrix constructor from array size error");
-      static_assert(type_::value <= L, "toArray : matrix constructor from array size error");
-      static_assert((L - type_::value >= SIZE), "toArray : matrix constructor from array size error");
+      static_assert(offset <= L, "toArray : matrix constructor from array size error");
+      static_assert((L - offset >= SIZE), "toArray : matrix constructor from array size error");
       size_t m{ 0 }, n{ 0 };
-      for (size_t i = type_::value; i < type_::value + SIZE; i++)
+      for (size_t i = offset; i < offset + SIZE; i++)
       {
         out[i] = static_cast<allowed_cast_t<T, U>>(data[m][n]);
         if (++n == N)
@@ -153,21 +335,15 @@ namespace lwm
     /**
      * @brief Copy To 2D array, supports compile time size check.
      */
-    template<
-        typename U,
-        size_t R,
-        size_t C,
-        typename r,
-        typename c,
-        typename = enable_if_t<is_same<const_size_t<r::value>, r>::value && is_same<const_size_t<c::value>, c>::value, void>>
-    void toArray(U (&out)[R][C], r, c) const
+    template<size_t offset_r, size_t offset_c, typename U, size_t R, size_t C>
+    void toArray(U (&out)[R][C]) const
     {
-      static_assert(R > r::value, "toArray matrix row size error");
-      static_assert(C > c::value, "toArray matrix col size error");
-      static_assert((M <= R - r::value) && (N <= C - c::value), "toArray matrix size error");
+      static_assert(R > offset_r, "toArray matrix row size error");
+      static_assert(C > offset_c, "toArray matrix col size error");
+      static_assert((M <= R - offset_r) && (N <= C - offset_c), "toArray matrix size error");
       for (size_t i = 0; i < M; i++)
         for (size_t j = 0; j < N; j++)
-          out[i + r::value][j + c::value] = static_cast<allowed_cast_t<T, U>>(data[i][j]);
+          out[i + offset_r][j + offset_c] = static_cast<allowed_cast_t<T, U>>(data[i][j]);
     }
     /**
      * @brief Construct a new Matrix object from 1D array.
@@ -251,29 +427,33 @@ namespace lwm
         data[i][c] = static_cast<allowed_cast_t<T, U>>(in);
     }
     template<size_t c, typename U>
-    void setCol(const Matrix<U, M, 1>& in) {
+    void setCol(const Matrix<U, M, 1>& in)
+    {
       static_assert(c < N, "requested col index over the size of row");
-      for(size_t i = 0; i < M; i++)
+      for (size_t i = 0; i < M; i++)
         data[i][c] = static_cast<allowed_cast_t<T, U>>(in.data[i][0]);
     }
     template<typename U>
-    void setCol(size_t c, const Matrix<U, M, 1>& in) {
+    void setCol(size_t c, const Matrix<U, M, 1>& in)
+    {
       assert(c < N);
-      for(size_t i = 0; i < M; i++)
+      for (size_t i = 0; i < M; i++)
         data[i][c] = static_cast<allowed_cast_t<T, U>>(in.data[i][0]);
     }
     template<size_t c, typename U, size_t L>
-    void setCol(const U (&in)[L]) {
+    void setCol(const U (&in)[L])
+    {
       static_assert(c < N, "requested col index over the size of row");
       static_assert(L <= M, "array input length is over the matrix row");
-      for(size_t i = 0; i < L; i++)
+      for (size_t i = 0; i < L; i++)
         data[i][c] = static_cast<allowed_cast_t<T, U>>(in[i]);
     }
     template<typename U, size_t L>
-    void setCol(size_t c, const U (&in)[L]) {
+    void setCol(size_t c, const U (&in)[L])
+    {
       assert(c < N);
       static_assert(L <= M, "array input length is over the matrix row");
-      for(size_t i = 0; i < L; i++)
+      for (size_t i = 0; i < L; i++)
         data[i][c] = static_cast<allowed_cast_t<T, U>>(in[i]);
     }
 
@@ -314,29 +494,33 @@ namespace lwm
         data[r][i] = static_cast<allowed_cast_t<T, U>>(in);
     }
     template<size_t r, typename U>
-    void setRow(const Matrix<U, 1, N>& in) {
+    void setRow(const Matrix<U, 1, N>& in)
+    {
       static_assert(r < M, "requested row index over the size of column");
-      for(size_t i = 0; i < N; i++)
+      for (size_t i = 0; i < N; i++)
         data[r][i] = static_cast<allowed_cast_t<T, U>>(in.data[0][i]);
     }
     template<typename U>
-    void setRow(size_t r, const Matrix<U, 1, N>& in) {
+    void setRow(size_t r, const Matrix<U, 1, N>& in)
+    {
       assert(r < M);
-      for(size_t i = 0; i < N; i++)
+      for (size_t i = 0; i < N; i++)
         data[r][i] = static_cast<allowed_cast_t<T, U>>(in.data[0][i]);
     }
     template<size_t r, typename U, size_t L>
-    void setRow(const U (&in)[L]) {
+    void setRow(const U (&in)[L])
+    {
       static_assert(r < M, "requested row index over the size of column");
       static_assert(L <= N, "array input length is over the matrix column");
-      for(size_t i = 0; i < L; i++)
+      for (size_t i = 0; i < L; i++)
         data[r][i] = static_cast<allowed_cast_t<T, U>>(in[i]);
     }
     template<typename U, size_t L>
-    void setRow(size_t r, const U (&in)[L]) {
+    void setRow(size_t r, const U (&in)[L])
+    {
       assert(r < M);
       static_assert(L <= N, "array input length is over the matrix column");
-      for(size_t i = 0; i < L; i++)
+      for (size_t i = 0; i < L; i++)
         data[r][i] = static_cast<allowed_cast_t<T, U>>(in[i]);
     }
 
@@ -514,34 +698,6 @@ namespace lwm
         for (size_t j = 0; j < N; j++)
           data[i][j] = static_cast<allowed_cast_t<T, U>>(in.data[i][j]);
     }
-    /**
-     * @brief Copy constructor(operator=) from same type of Matrix object.
-     *
-     * @param in Matrix object
-     * @return Matrix<T, M, N>& current Matrix object.
-     */
-    // Matrix& operator=(const Matrix& in)
-    // {
-    //   if (this != const_cast<Matrix*>(&in))
-    //     for (size_t i = 0; i < M; i++)
-    //       for (size_t j = 0; j < N; j++)
-    //         data[i][j] = in.data[i][j];
-    //   return (*this);
-    // }
-    /**
-     * @brief Copy constructor(operator=) from other type of Matrix object.
-     *
-     * @tparam U type of Matrix object
-     * @return Matrix<T, M, N>& current Matrix object.
-     */
-    // template<typename U>
-    // Matrix& operator=(const Matrix<U, M, N>& in)
-    // {
-    //   for (size_t i = 0; i < M; i++)
-    //     for (size_t j = 0; j < N; j++)
-    //       data[i][j] = static_cast<allowed_cast_t<T, U>>(in.data[i][j]);
-    //   return (*this);
-    // }
     /**
      * @brief Explicit conversion to different type
      */
