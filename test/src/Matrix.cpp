@@ -87,16 +87,36 @@ TEST_CASE("Matrix", "[lwm::Matrix]")
     double arr2[5] = { 1.0, 2.0, 3.0, 4.0, 5.0 };
     lwm::Matrix<float, 2, 3> matrix2{ arr2 };
     matrix2 = arr2;
-    REQUIRE(matrix2(constexpr_size_t(0), constexpr_size_t(0)) == static_cast<lwm::internal::allowed_cast_t<float, double>>(arr2[0]));
-    REQUIRE(matrix2(constexpr_size_t(0), constexpr_size_t(1)) == static_cast<lwm::internal::allowed_cast_t<float, double>>(arr2[1]));
-    REQUIRE(matrix2(constexpr_size_t(0), constexpr_size_t(2)) == static_cast<lwm::internal::allowed_cast_t<float, double>>(arr2[2]));
-    REQUIRE(matrix2(constexpr_size_t(1), constexpr_size_t(0)) == static_cast<lwm::internal::allowed_cast_t<float, double>>(arr2[3]));
-    REQUIRE(matrix2(constexpr_size_t(1), constexpr_size_t(1)) == static_cast<lwm::internal::allowed_cast_t<float, double>>(arr2[4]));
-    REQUIRE(matrix2[constexpr_size_t(0)][constexpr_size_t(0)] == static_cast<lwm::internal::allowed_cast_t<float, double>>(arr2[0]));
-    REQUIRE(matrix2[constexpr_size_t(0)][constexpr_size_t(1)] == static_cast<lwm::internal::allowed_cast_t<float, double>>(arr2[1]));
-    REQUIRE(matrix2[constexpr_size_t(0)][constexpr_size_t(2)] == static_cast<lwm::internal::allowed_cast_t<float, double>>(arr2[2]));
-    REQUIRE(matrix2[constexpr_size_t(1)][constexpr_size_t(0)] == static_cast<lwm::internal::allowed_cast_t<float, double>>(arr2[3]));
-    REQUIRE(matrix2[constexpr_size_t(1)][constexpr_size_t(1)] == static_cast<lwm::internal::allowed_cast_t<float, double>>(arr2[4]));
+    REQUIRE(
+        matrix2(constexpr_size_t(0), constexpr_size_t(0)) ==
+        static_cast<lwm::internal::allowed_cast_t<float, double>>(arr2[0]));
+    REQUIRE(
+        matrix2(constexpr_size_t(0), constexpr_size_t(1)) ==
+        static_cast<lwm::internal::allowed_cast_t<float, double>>(arr2[1]));
+    REQUIRE(
+        matrix2(constexpr_size_t(0), constexpr_size_t(2)) ==
+        static_cast<lwm::internal::allowed_cast_t<float, double>>(arr2[2]));
+    REQUIRE(
+        matrix2(constexpr_size_t(1), constexpr_size_t(0)) ==
+        static_cast<lwm::internal::allowed_cast_t<float, double>>(arr2[3]));
+    REQUIRE(
+        matrix2(constexpr_size_t(1), constexpr_size_t(1)) ==
+        static_cast<lwm::internal::allowed_cast_t<float, double>>(arr2[4]));
+    REQUIRE(
+        matrix2[constexpr_size_t(0)][constexpr_size_t(0)] ==
+        static_cast<lwm::internal::allowed_cast_t<float, double>>(arr2[0]));
+    REQUIRE(
+        matrix2[constexpr_size_t(0)][constexpr_size_t(1)] ==
+        static_cast<lwm::internal::allowed_cast_t<float, double>>(arr2[1]));
+    REQUIRE(
+        matrix2[constexpr_size_t(0)][constexpr_size_t(2)] ==
+        static_cast<lwm::internal::allowed_cast_t<float, double>>(arr2[2]));
+    REQUIRE(
+        matrix2[constexpr_size_t(1)][constexpr_size_t(0)] ==
+        static_cast<lwm::internal::allowed_cast_t<float, double>>(arr2[3]));
+    REQUIRE(
+        matrix2[constexpr_size_t(1)][constexpr_size_t(1)] ==
+        static_cast<lwm::internal::allowed_cast_t<float, double>>(arr2[4]));
 
     double arr3[1] = { 1.0 };
     lwm::Matrix<float, 2, 3> matrix3{ arr3 };
@@ -178,7 +198,7 @@ TEST_CASE("Matrix", "[lwm::Matrix]")
     REQUIRE(matrix_[0][1] == 2.0f);
     REQUIRE(matrix_[1][1] == 2.0f);
   }
-  SECTION("fill")
+  SECTION("fill, setRow, setCol")
   {
     Matrix<double, 2, 3> matrix;
     matrix.fill(10.0f);
@@ -191,10 +211,102 @@ TEST_CASE("Matrix", "[lwm::Matrix]")
       for (int j = 0; j < 3; j++)
         REQUIRE(matrix[i][j] == 10.0);
 
+    matrix.setRow(0, 1.0);
+    for (int j = 0; j < 3; j++)
+      REQUIRE(matrix[0][j] == 1.0);
+    matrix.setRow(1, 2.0);
+    for (int j = 0; j < 3; j++)
+      REQUIRE(matrix[1][j] == 2.0);
 
-    // Compile time error
-    // Matrix<uint32_t, 2, 3> matrix2;
-    // matrix2.fill(10.0);
+    matrix.setRow<0>(1.0);
+    for (int j = 0; j < 3; j++)
+      REQUIRE(matrix[0][j] == 1.0);
+    matrix.setRow<1>(2.0);
+    for (int j = 0; j < 3; j++)
+      REQUIRE(matrix[1][j] == 2.0);
+    // matrix.setRow<2>(2.0f);
+
+    matrix.setCol<0>(1.0);
+    for (int j = 0; j < 2; j++)
+      REQUIRE(matrix[j][0] == 1.0);
+    matrix.setCol<1>(2.0);
+    for (int j = 0; j < 2; j++)
+      REQUIRE(matrix[j][1] == 2.0);
+    matrix.setCol<2>(3.0);
+    for (int j = 0; j < 2; j++)
+      REQUIRE(matrix[j][2] == 3.0);
+    // matrix.setCol<3>(2.0f);
+
+    Matrix<double, 1, 3> row{ { 4.0, 5.0, 6.0 } };
+    matrix.setRow<0>(row);
+    matrix.setRow<1>(row);
+    for (int i = 0; i < 2; i++)
+      for (int j = 0; j < 3; j++)
+        REQUIRE(matrix[i][j] == row[j]);
+    // matrix.setRow<2>(row);
+
+    Matrix<double, 1, 3> row2{ { 7.0, 8.0, 9.0 } };
+    matrix.setRow(0, row2);
+    matrix.setRow(1, row2);
+    for (int i = 0; i < 2; i++)
+      for (int j = 0; j < 3; j++)
+        REQUIRE(matrix[i][j] == row2[j]);
+    // matrix.setRow(2, row2);
+
+    matrix.setRow<0>({ 1.0, 1.0, 1.0 });
+    for (int j = 0; j < 3; j++)
+      REQUIRE(matrix[0][j] == 1.0);
+    matrix.setRow<1>({ 2.0, 2.0, 2.0 });
+    for (int j = 0; j < 3; j++)
+      REQUIRE(matrix[1][j] == 2.0);
+    matrix.setRow(0, { 3.0, 3.0, 3.0 });
+    for (int j = 0; j < 3; j++)
+      REQUIRE(matrix[0][j] == 3.0);
+    matrix.setRow(1, { 4.0, 4.0, 4.0 });
+    for (int j = 0; j < 3; j++)
+      REQUIRE(matrix[1][j] == 4.0);
+
+    matrix.setRow<0>({ 1.0, 1.0, 1.0 });
+    for (int j = 0; j < 3; j++)
+      REQUIRE(matrix[0][j] == 1.0);
+    matrix.setRow<1>({ 2.0, 2.0, 2.0 });
+    for (int j = 0; j < 3; j++)
+      REQUIRE(matrix[1][j] == 2.0);
+    matrix.setRow(0, { 3.0, 3.0, 3.0 });
+    for (int j = 0; j < 3; j++)
+      REQUIRE(matrix[0][j] == 3.0);
+    matrix.setRow(1, { 4.0, 4.0, 4.0 });
+    for (int j = 0; j < 3; j++)
+      REQUIRE(matrix[1][j] == 4.0);
+
+    Matrix<double, 2, 1> col{{4.0, 5.0}};
+    matrix.setCol<0>(col);
+    matrix.setCol<1>(col);
+    matrix.setCol<2>(col);
+    for (int i = 0; i < 3; i++)
+      for (int j = 0; j < 2; j++)
+        REQUIRE(matrix[j][i] == col[j]);
+
+    Matrix<double, 2, 1> col2{ {7.0, 8.0} };
+    matrix.setCol(0, col2);
+    matrix.setCol(1, col2);
+    matrix.setCol(2, col2);
+    for (int i = 0; i < 3; i++)
+      for (int j = 0; j < 2; j++)
+        REQUIRE(matrix[j][i] == col2[j]);
+
+    matrix.setCol<0>({ 1.0, 1.0 });
+    for (int j = 0; j < 2; j++)
+      REQUIRE(matrix[j][0] == 1.0);
+    matrix.setCol<1>({ 2.0, 2.0  });
+    for (int j = 0; j < 2; j++)
+      REQUIRE(matrix[j][1] == 2.0);
+    matrix.setCol(0, { 3.0, 3.0  });
+    for (int j = 0; j < 2; j++)
+      REQUIRE(matrix[j][0] == 3.0);
+    matrix.setCol(1, { 4.0, 4.0 });
+    for (int j = 0; j < 2; j++)
+      REQUIRE(matrix[j][1] == 4.0);
   }
   SECTION("transpose & cast")
   {
@@ -283,7 +395,6 @@ TEST_CASE("Matrix", "[lwm::Matrix]")
     Matrix<int, 1, 6> value2{ { 1, 2, 3, 4, 5, 6 } };
     Matrix<int, 6, 1> value3{ { 1, 2, 3, 4, 5, 6 } };
 
-  
     REQUIRE(value2(constexpr_size_t(0)) == 1);
     REQUIRE(value2(constexpr_size_t(1)) == 2);
     REQUIRE(value2(constexpr_size_t(2)) == 3);
@@ -300,19 +411,40 @@ TEST_CASE("Matrix", "[lwm::Matrix]")
     for (int i = 0; i < 4; i++)
     {
       REQUIRE(value() == 7);
-      REQUIRE(value2(i) == (i+1));
-      REQUIRE(value3(i) == (i+1));
-      REQUIRE((i+1) == value2(i));
-      REQUIRE((i+1) == value3(i));
-      
-      REQUIRE((i+1) == value2[i]);
-      REQUIRE((i+1) == value3[i]);
-      REQUIRE(value2[i] == (i+1));
-      REQUIRE(value3[i] == (i+1));
+      REQUIRE(value2(i) == (i + 1));
+      REQUIRE(value3(i) == (i + 1));
+      REQUIRE((i + 1) == value2(i));
+      REQUIRE((i + 1) == value3(i));
 
+      REQUIRE((i + 1) == value2[i]);
+      REQUIRE((i + 1) == value3[i]);
+      REQUIRE(value2[i] == (i + 1));
+      REQUIRE(value3[i] == (i + 1));
 
       REQUIRE(value(0, 0) == 7);
       // REQUIRE(test_int[i][0] == const_test_int[i][0]);
     }
+  }
+  SECTION("static functions")
+  {
+    auto test = Matrix<int, 3,3>::Zero();
+    for(int i = 0; i < 3; i++)
+      for(int j = 0; j < 3; j++)
+        REQUIRE(test(i, j) == 0);
+     
+    auto test2 = Matrix<double, 3,3>::Zero(); 
+    for(int i = 0; i < 3; i++)
+      for(int j = 0; j < 3; j++)
+        REQUIRE(test2(i, j) == 0.0);
+
+    // Matrix<int, 3,3>::NaN();
+    auto test3 = Matrix<float, 3,3>::NaN();
+    for(int i = 0; i < 3; i++)
+      for(int j = 0; j < 3; j++)
+        REQUIRE(isnan(test3[i][j]));
+
+    auto test4 = Matrix<float, 3,4>::Identity();
+    for(int i = 0; i < 3; i++)
+        REQUIRE(test4[i][i] == 1.0f);
   }
 }

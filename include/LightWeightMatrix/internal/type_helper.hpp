@@ -150,5 +150,16 @@ namespace lwm
     using floating_types_holer_1 = typename floating_types_holer<T>::type_1;
     template<typename T>
     using floating_types_holer_2 = typename floating_types_holer<T>::type_2;
+
+    template<typename T, T T1, T T2>
+    struct min
+    {
+      static const T value = (T1 < T2) ? T1:T2;
+    };
+    template<typename T, T T1, T T2>
+    struct max
+    {
+      static const T value = (T1 > T2) ? T1:T2;
+    };
   };  // namespace internal
 };    // namespace lwm

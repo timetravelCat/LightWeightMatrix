@@ -16,6 +16,7 @@
 
 #include "assert.h"
 #include "internal/type_helper.hpp"
+#include "math.h"
 
 #define constexpr_size_t(x) lwm::const_size_t<x>()
 
@@ -45,9 +46,32 @@ namespace lwm
     constexpr static size_t SIZE{ M * N };
     Matrix() = default;
 
-    // serRow, setCol/ ... / Zero, / setAll / Identity, swap? abs ? max, min / nan check ...
-    // Todo : include SetCol / SetRow in Initialization codes in order to fill un-initialized values in constructor.
-    // initialization using initializer_list
+    // static methods of constants, starts with Upper case.
+    static Matrix Zero(){
+      return Matrix();
+    }
+    template<typename T_ = T> 
+    static enable_if_t<is_floating_point<T_>::value, Matrix> NaN(){
+        Matrix res;
+        res.fill(NAN);
+        return res;
+    }
+    static Matrix Constant(T value){
+      Matrix res;
+      res.fill(value);
+      return res;
+    }
+    static Matrix Identity(){
+      Matrix res;
+      for(size_t i = 0; i < min<size_t, M, N>::value; i++)
+        res.data[i][i] = static_cast<T>(1);
+      return res;
+    }
+    
+
+
+
+
 
     // Hadamard(elementwise) product / elementwise devide
     // operator* / operator+ / operator- / += / -= / *= / ...
@@ -226,15 +250,32 @@ namespace lwm
       for (size_t i = 0; i < M; i++)
         data[i][c] = static_cast<allowed_cast_t<T, U>>(in);
     }
-
-    // template<typename U>
-    // void setCol(size_t c, const Matrix<U, M, 1>& in)
-    // {
-      // assert(c < N);
-      // for (size_t i = 0; i < M; i++)
-      //   data[i][c] = static_cast<allowed_cast_t<T, U>>(in);
-    // }
-
+    template<size_t c, typename U>
+    void setCol(const Matrix<U, M, 1>& in) {
+      static_assert(c < N, "requested col index over the size of row");
+      for(size_t i = 0; i < M; i++)
+        data[i][c] = static_cast<allowed_cast_t<T, U>>(in.data[i][0]);
+    }
+    template<typename U>
+    void setCol(size_t c, const Matrix<U, M, 1>& in) {
+      assert(c < N);
+      for(size_t i = 0; i < M; i++)
+        data[i][c] = static_cast<allowed_cast_t<T, U>>(in.data[i][0]);
+    }
+    template<size_t c, typename U, size_t L>
+    void setCol(const U (&in)[L]) {
+      static_assert(c < N, "requested col index over the size of row");
+      static_assert(L <= M, "array input length is over the matrix row");
+      for(size_t i = 0; i < L; i++)
+        data[i][c] = static_cast<allowed_cast_t<T, U>>(in[i]);
+    }
+    template<typename U, size_t L>
+    void setCol(size_t c, const U (&in)[L]) {
+      assert(c < N);
+      static_assert(L <= M, "array input length is over the matrix row");
+      for(size_t i = 0; i < L; i++)
+        data[i][c] = static_cast<allowed_cast_t<T, U>>(in[i]);
+    }
 
     /**
      * @brief Compile time, get row of Matrix
@@ -272,6 +313,33 @@ namespace lwm
       for (size_t i = 0; i < N; i++)
         data[r][i] = static_cast<allowed_cast_t<T, U>>(in);
     }
+    template<size_t r, typename U>
+    void setRow(const Matrix<U, 1, N>& in) {
+      static_assert(r < M, "requested row index over the size of column");
+      for(size_t i = 0; i < N; i++)
+        data[r][i] = static_cast<allowed_cast_t<T, U>>(in.data[0][i]);
+    }
+    template<typename U>
+    void setRow(size_t r, const Matrix<U, 1, N>& in) {
+      assert(r < M);
+      for(size_t i = 0; i < N; i++)
+        data[r][i] = static_cast<allowed_cast_t<T, U>>(in.data[0][i]);
+    }
+    template<size_t r, typename U, size_t L>
+    void setRow(const U (&in)[L]) {
+      static_assert(r < M, "requested row index over the size of column");
+      static_assert(L <= N, "array input length is over the matrix column");
+      for(size_t i = 0; i < L; i++)
+        data[r][i] = static_cast<allowed_cast_t<T, U>>(in[i]);
+    }
+    template<typename U, size_t L>
+    void setRow(size_t r, const U (&in)[L]) {
+      assert(r < M);
+      static_assert(L <= N, "array input length is over the matrix column");
+      for(size_t i = 0; i < L; i++)
+        data[r][i] = static_cast<allowed_cast_t<T, U>>(in[i]);
+    }
+
     /**
      * @brief Compile time matrix slice API.
      *
@@ -391,7 +459,6 @@ namespace lwm
     {
       size_static_assert<R, C, 0, 0>();
       size_assert<R, C>(r, c);
-      // Todo :: Call SetZero?
       for (size_t i = r; i < r + R; i++)
         for (size_t j = c; j < c + C; j++)
           data[i][j] = static_cast<allowed_cast_t<T, U>>(in[i - r][j - c]);
@@ -407,7 +474,6 @@ namespace lwm
     Matrix<T, M, N>& operator=(const U (&in)[R][C])
     {
       size_static_assert<R, C, 0, 0>();
-      // Todo :: Call SetZero?
       for (size_t i = 0; i < R; i++)
         for (size_t j = 0; j < C; j++)
           data[i][j] = static_cast<allowed_cast_t<T, U>>(in[i][j]);
@@ -432,7 +498,6 @@ namespace lwm
     explicit Matrix(const U (&in)[R][C], r, c)
     {
       size_static_assert<R, C, r::value, c::value>();
-      // Todo :: Call SetZero?
       for (size_t i = r::value; i < r::value + R; i++)
         for (size_t j = c::value; j < c::value + C; j++)
           data[i][j] = static_cast<allowed_cast_t<T, U>>(in[i - r::value][j - c::value]);
