@@ -308,7 +308,7 @@ TEST_CASE("Matrix", "[lwm::Matrix]")
     for (int j = 0; j < 2; j++)
       REQUIRE(matrix[j][1] == 4.0);
   }
-  SECTION("transpose & cast")
+  SECTION("transpose & cast & toRowVector, to toColVector")
   {
     float arr[2][3] = { { 1.0f, 2.0f, 3.0f }, { 4.0f, 5.0f, 6.0f } };
     Matrix<float, 2, 3> matrix{ arr };
@@ -336,6 +336,16 @@ TEST_CASE("Matrix", "[lwm::Matrix]")
     for (int i = 0; i < 2; i++)
       for (int j = 0; j < 3; j++)
         REQUIRE(casted[i][j] == static_cast<uint32_t>(matrix[i][j]));
+
+    Matrix<int, 1, 3> test{ { 1, 2, 3 } };
+    Matrix<int, 3, 1> test2 = test.toRowVector();
+    REQUIRE(test2[0]==1);
+    REQUIRE(test2[1]==2);
+    REQUIRE(test2[2]==3);
+    Matrix<int, 1, 3> test3 = test2.toColVector();
+    REQUIRE(test3[0]==1);
+    REQUIRE(test3[1]==2);
+    REQUIRE(test3[2]==3);
   }
   SECTION("slice")
   {

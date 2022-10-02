@@ -585,6 +585,14 @@ namespace lwm
         data[r][i] = static_cast<allowed_cast_t<T, U>>(in[i]);
     }
 
+    template<typename T_ = T>
+    enable_if_t<M==1, Matrix<T_, N, 1>> toRowVector() {
+      return transpose();
+    }
+    template<typename T_ = T>
+    enable_if_t<N==1, Matrix<T_, 1, M>> toColVector() {
+      return transpose();
+    }
     /**
      * @brief Compile time matrix slice API.
      *
