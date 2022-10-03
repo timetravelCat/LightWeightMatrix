@@ -78,6 +78,8 @@ namespace lwm
   template<typename U>
   Matrix<T, M, N>::Matrix(const Matrix<U, M, N>& in)
   {
+    if(memcmp(data, in.data, sizeof(T))==0)
+      return;
     for (size_t i = 0; i < M; i++)
       for (size_t j = 0; j < N; j++)
         data[i][j] = static_cast<allowed_cast_t<T, U>>(in.data[i][j]);

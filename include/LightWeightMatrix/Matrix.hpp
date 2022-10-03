@@ -80,47 +80,47 @@ namespace lwm
      * @return returns abs Matrix. enabled only type is floating point.
      */
     template<typename T_ = T>
-    enable_if_t<is_floating_point<T_>::value, Matrix<T_, M, N>> abs() const;
+    inline enable_if_t<is_floating_point<T_>::value, Matrix<T_, M, N>> abs() const;
     /**
      * @brief Check values are all NaN or not.
      *
      * @return Returns all value is nan or not. enabled only type is floating point.
      */
     template<typename T_ = T>
-    enable_if_t<are_floating_point<T_>::value, bool> isAllNan() const;
+    inline enable_if_t<are_floating_point<T_>::value, bool> isAllNan() const;
     /**
      * @brief Check NaN value is contained or not.
      *
      * @return Returns any value is nan or not. enabled only type is floating point.
      */
     template<typename T_ = T>
-    enable_if_t<are_floating_point<T_>::value, bool> isAnyNan() const;
+    inline enable_if_t<are_floating_point<T_>::value, bool> isAnyNan() const;
     /**
      * @brief Returns Maximum value in Matrix.
      *
      * @return T maximum value
      */
-    T max() const;
+    inline T max() const;
     /**
      * @brief Returns Minimum value in Matrix.
      *
      * @return T minimum value
      */
-    T min() const;
+    inline T min() const;
     /**
      * @brief Returns element wise multiply between matrix.
      *
      * @return Matrix [M][N] with implicit casted between input matrix.
      */
     template<typename U>
-    Matrix<implicit_cast_t<T, U>, M, N> elementWiseMultiply(const Matrix<U, M, N>& other) const;
+    inline Matrix<implicit_cast_t<T, U>, M, N> elementWiseMultiply(const Matrix<U, M, N>& other) const;
     /**
      * @brief Returns element wise divide between matrix.
      *
      * @return Matrix [M][N] with implicit casted between input matrix.
      */
     template<typename U>
-    Matrix<implicit_cast_t<T, U>, M, N> elementWiseDivide(const Matrix<U, M, N>& other) const;
+    inline Matrix<implicit_cast_t<T, U>, M, N> elementWiseDivide(const Matrix<U, M, N>& other) const;
     /**
      * @brief Copy to 1D array Type, copy from signed type to unsigned is not allowed.
      *
@@ -128,7 +128,7 @@ namespace lwm
      * @param offset offset of copied array, index of copy point.
      */
     template<typename U, size_t L>
-    void toArray(U (&out)[L], size_t offset = size_t(0)) const;
+    inline void toArray(U (&out)[L], size_t offset = size_t(0)) const;
     /**
      * @brief Copy to 1D array Type, supports compile time size checking, copy from signed type to unsigned is not allowed.
      *
@@ -136,7 +136,7 @@ namespace lwm
      * @tparam offset offset of copied array, index of copy point. supports compile time size check.
      */
     template<size_t offset, typename U, size_t L>
-    void toArray(U (&out)[L]) const;
+    inline void toArray(U (&out)[L]) const;
     /**
      * @brief Copy To 2D array. copy from signed type to unsigned is not allowed.
      *
@@ -147,7 +147,7 @@ namespace lwm
      * @param c col offset of array, index of copy point.
      */
     template<typename U, size_t R, size_t C>
-    void toArray(U (&out)[R][C], size_t r = size_t(0), size_t c = size_t(0)) const;
+    inline void toArray(U (&out)[R][C], size_t r = size_t(0), size_t c = size_t(0)) const;
     /**
      * @brief Copy To 2D array. copy from signed type to unsigned is not allowed.
      *
@@ -158,81 +158,81 @@ namespace lwm
      * @tparam c col offset of array, index of copy point. compile time size check enabled.
      */
     template<size_t offset_r, size_t offset_c, typename U, size_t R, size_t C>
-    void toArray(U (&out)[R][C]) const;
+    inline void toArray(U (&out)[R][C]) const;
     /**
      * @brief Get column of Matrix, compile time size check enabled.
      *
      * @tparam c index of column
      */
     template<size_t c>
-    Matrix<T, M, 1> col() const;
+    inline Matrix<T, M, 1> col() const;
     /**
      * @brief Get column of Matrix
      *
      * @tparam c index of column
      */
-    Matrix<T, M, 1> col(size_t c) const;
+    inline Matrix<T, M, 1> col(size_t c) const;
     /**
      * @brief Get row of Matrix, compile time size check enabled.
      *
      * @tparam r index of row
      */
     template<size_t r>
-    Matrix<T, 1, N> row() const;
+    inline Matrix<T, 1, N> row() const;
     /**
      * @brief Get row of Matrix
      *
      * @tparam r index of row
      */
-    Matrix<T, 1, N> row(size_t r) const;
+    inline Matrix<T, 1, N> row(size_t r) const;
 
     /**
      * @brief Set column from value or column Matrix.
      */
     template<size_t c, typename U>
-    void setCol(U in);
+    inline void setCol(U in);
     template<typename U>
-    void setCol(size_t c, U in);
+    inline void setCol(size_t c, U in);
     template<size_t c, typename U>
-    void setCol(const Matrix<U, M, 1>& in);
+    inline void setCol(const Matrix<U, M, 1>& in);
     template<typename U>
-    void setCol(size_t c, const Matrix<U, M, 1>& in);
+    inline void setCol(size_t c, const Matrix<U, M, 1>& in);
     template<size_t c, typename U, size_t L>
-    void setCol(const U (&in)[L]);
+    inline void setCol(const U (&in)[L]);
     template<typename U, size_t L>
-    void setCol(size_t c, const U (&in)[L]);
+    inline void setCol(size_t c, const U (&in)[L]);
     /**
      * @brief Set row from value or row Matrix.
      */
     template<size_t r, typename U>
-    void setRow(U in);
+    inline void setRow(U in);
     template<typename U>
-    void setRow(size_t r, U in);
+    inline void setRow(size_t r, U in);
     template<size_t r, typename U>
-    void setRow(const Matrix<U, 1, N>& in);
+    inline void setRow(const Matrix<U, 1, N>& in);
     template<typename U>
-    void setRow(size_t r, const Matrix<U, 1, N>& in);
+    inline void setRow(size_t r, const Matrix<U, 1, N>& in);
     template<size_t r, typename U, size_t L>
-    void setRow(const U (&in)[L]);
+    inline void setRow(const U (&in)[L]);
     template<typename U, size_t L>
-    void setRow(size_t r, const U (&in)[L]);
+    inline void setRow(size_t r, const U (&in)[L]);
 
     /**
      * @brief if ColumnVector, converts to row vector (transpose)
      */
     template<typename T_ = T>
-    enable_if_t<M == 1, Matrix<T_, N, 1>> toRowVector() const;
+    inline enable_if_t<M == 1, Matrix<T_, N, 1>> toRowVector() const;
     /**
      * @brief if RowVector, converts to col vector (transpose)
      */
     template<typename T_ = T>
-    enable_if_t<N == 1, Matrix<T_, 1, M>> toColVector() const;
+    inline enable_if_t<N == 1, Matrix<T_, 1, M>> toColVector() const;
 
     /**
      * @brief Explict cast operation. any type is allowed.
      */
     template<typename U, typename = enable_if_t<!is_same<U, T>::value>>
-    Matrix<U, M, N> cast() const;
+    inline Matrix<U, M, N> cast() const;
     /**
      * @brief Compile time matrix slice API.
      *
@@ -243,18 +243,18 @@ namespace lwm
      * @return Matrix<T, R, C>
      */
     template<size_t R, size_t C, size_t r = 0, size_t c = 0>
-    Matrix<T, R, C> slice() const;
+    inline Matrix<T, R, C> slice() const;
     /**
      * @brief Return Transposed Matrix
      *
      * @return Matrix<T, N, M>
      */
-    Matrix<T, N, M> transpose() const;
+    inline Matrix<T, N, M> transpose() const;
     /**
      * @brief fill operation
      */
     template<typename U>
-    void fill(const U in);
+    inline void fill(const U in);
 
     /**
      * @brief Mathmatical operations
@@ -303,12 +303,16 @@ namespace lwm
      */
     template<typename U, size_t L>
     Matrix<T, M, N>& operator=(const U (&in)[L]);
-
     /**
      * @brief copy from 2D array, copy from signed to unsigned is not allowed.
      */
     template<typename U, size_t R, size_t C>
     Matrix<T, M, N>& operator=(const U (&in)[R][C]);
+    /**
+     * @brief Copy from Matrix.
+     */
+    template<typename U>
+    Matrix<T, M, N>& operator=(const Matrix<U, M, N>& in);
 
     // /**
     //  * @brief get info char array

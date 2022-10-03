@@ -212,4 +212,16 @@ namespace lwm
         data[i][j] = static_cast<allowed_cast_t<T, U>>(in[i][j]);
     return (*this);
   }
+  template<typename T, size_t M, size_t N>
+  template<typename U>
+  Matrix<T, M, N>& Matrix<T, M, N>::operator=(const Matrix<U, M, N>& in)
+  {
+    if (memcmp(data, in.data, sizeof(T)) == 0)
+      return (*this);
+    for (size_t i = 0; i < M; i++)
+      for (size_t j = 0; j < N; j++)
+        data[i][j] = static_cast<allowed_cast_t<T, U>>(in.data[i][j]);
+    
+    return (*this);
+  }
 };  // namespace lwm
