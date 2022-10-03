@@ -552,7 +552,7 @@ namespace lwm
   template<size_t M, size_t N>
   using Matrixi = Matrix<int, M, N>;
   template<size_t M, size_t N>
-  using Matrixui = Matrix<uint32_t, M, N>;
+  using Matrixui = Matrix<unsigned int, M, N>;
   template<size_t M, size_t N>
   using Matrixf = Matrix<float, M, N>;
   template<size_t M, size_t N>
@@ -565,7 +565,7 @@ namespace lwm
   template<size_t N>
   using SquareMatrixi = SquareMatrix<int, N>;
   template<size_t N>
-  using SquareMatrixui = SquareMatrix<uint32_t, N>;
+  using SquareMatrixui = SquareMatrix<unsigned int, N>;
   template<size_t N>
   using SquareMatrixf = SquareMatrix<float, N>;
   template<size_t N>
@@ -578,7 +578,7 @@ namespace lwm
   template<size_t N>
   using RowVectori = RowVector<int, N>;
   template<size_t N>
-  using RowVectorui = RowVector<uint32_t, N>;
+  using RowVectorui = RowVector<unsigned int, N>;
   template<size_t N>
   using RowVectorf = RowVector<float, N>;
   template<size_t N>
@@ -591,7 +591,7 @@ namespace lwm
   template<size_t N>
   using ColVectori = ColVector<int, N>;
   template<size_t N>
-  using ColVectorui = ColVector<uint32_t, N>;
+  using ColVectorui = ColVector<unsigned int, N>;
   template<size_t N>
   using ColVectorf = ColVector<float, N>;
   template<size_t N>
@@ -604,7 +604,7 @@ namespace lwm
   template<size_t N>
   using Vectori = Vector<int, N>;
   template<size_t N>
-  using Vectorui = Vector<uint32_t, N>;
+  using Vectorui = Vector<unsigned int, N>;
   template<size_t N>
   using Vectorf = Vector<float, N>;
   template<size_t N>
@@ -615,7 +615,7 @@ namespace lwm
   template<typename T>
   using RotationMatrix = SquareMatrix<T, 3>;
   using RotationMatrixi = RotationMatrix<int>;
-  using RotationMatrixui = RotationMatrix<uint32_t>;
+  using RotationMatrixui = RotationMatrix<unsigned int>;
   using RotationMatrixf = RotationMatrix<float>;
   using RotationMatrixd = RotationMatrix<double>;
   using RotationMatrixld = RotationMatrix<long double>;
@@ -623,7 +623,7 @@ namespace lwm
   template<typename T>
   using DirectionCosineMatrix = RotationMatrix<T>;
   using DirectionCosineMatrixi = DirectionCosineMatrix<int>;
-  using DirectionCosineMatrixui = DirectionCosineMatrix<uint32_t>;
+  using DirectionCosineMatrixui = DirectionCosineMatrix<unsigned int>;
   using DirectionCosineMatrixf = DirectionCosineMatrix<float>;
   using DirectionCosineMatrixd = DirectionCosineMatrix<double>;
   using DirectionCosineMatrixld = DirectionCosineMatrix<long double>;
@@ -631,7 +631,7 @@ namespace lwm
   template<typename T>
   using DCM = DirectionCosineMatrix<T>;
   using DCMi = DCM<int>;
-  using DCMui = DCM<uint32_t>;
+  using DCMui = DCM<unsigned int>;
   using DCMf = DCM<float>;
   using DCMd = DCM<double>;
   using DCMld = DCM<long double>;
