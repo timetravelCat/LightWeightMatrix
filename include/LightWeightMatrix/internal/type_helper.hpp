@@ -10,6 +10,7 @@
  */
 
 #pragma once
+#include "float.h"
 #include "type_traits.hpp"
 
 namespace lwm
@@ -114,13 +115,15 @@ namespace lwm
       typedef typename implicit_cast<T, typename implicit_cast<T1, TRest...>::type>::type type;
     };
     template<typename T, typename T1>
-    struct implicit_cast<T, T1> : enable_if<are_arithmetic<T, T1>::value, conditional_t<
-          include_floating_point<T, T1>::value,
-          implicit_cast_floating_point_t<T, T1>,
-          conditional_t<
-              (sizeof(T) >= sizeof(T1)),
-              conditional_t<include_signed<T, T1>::value, make_signed_t<T>, T>,
-              conditional_t<include_signed<T, T1>::value, make_signed_t<T1>, T1>>>>
+    struct implicit_cast<T, T1> : enable_if<
+                                      are_arithmetic<T, T1>::value,
+                                      conditional_t<
+                                          include_floating_point<T, T1>::value,
+                                          implicit_cast_floating_point_t<T, T1>,
+                                          conditional_t<
+                                              (sizeof(T) >= sizeof(T1)),
+                                              conditional_t<include_signed<T, T1>::value, make_signed_t<T>, T>,
+                                              conditional_t<include_signed<T, T1>::value, make_signed_t<T1>, T1>>>>
     {
     };
     template<typename T, typename T1, typename... TRest>
@@ -138,13 +141,12 @@ namespace lwm
     template<typename T>
     struct floating_types_holer
     {
-      typedef conditional_t<is_same<T, float>::value, double, float>
-          type_1;
+      typedef conditional_t<is_same<T, float>::value, double, float> type_1;
       typedef conditional_t<
           is_same<T, float>::value,
           long double,
           conditional_t<is_same<T, double>::value, long double, double>>
-          type_2; 
+          type_2;
     };
     template<typename T>
     using floating_types_holer_1 = typename floating_types_holer<T>::type_1;
@@ -154,12 +156,41 @@ namespace lwm
     template<typename T, T T1, T T2>
     struct min
     {
-      static const T value = (T1 < T2) ? T1:T2;
+      static const T value = (T1 < T2) ? T1 : T2;
     };
     template<typename T, T T1, T T2>
     struct max
     {
-      static const T value = (T1 > T2) ? T1:T2;
+      static const T value = (T1 > T2) ? T1 : T2;
     };
+    struct epsilon_flt
+    {
+      static constexpr float value = FLT_EPSILON;
+      typedef epsilon_flt type;
+    };
+    struct epsilon_dbl
+    {
+      static constexpr float value = DBL_EPSILON;
+      typedef epsilon_dbl type;
+    };
+    struct epsilon_ldbl
+    {
+      static constexpr float value = LDBL_EPSILON;
+      typedef epsilon_ldbl type;
+    };
+    template<typename T>
+    struct type_epsilon : enable_if<
+                              is_floating_point<T>::value,
+                              conditional_t<
+                                  is_same<T, float>::value,
+                                  epsilon_flt,
+                                  conditional_t<
+                                      is_same<T, double>::value,
+                                      epsilon_dbl,
+                                      epsilon_ldbl>>>
+    {
+    };
+    template<typename T>
+    using type_epsilon_t = typename type_epsilon<T>::type;
   };  // namespace internal
 };    // namespace lwm

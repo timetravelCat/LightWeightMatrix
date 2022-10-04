@@ -255,6 +255,27 @@ namespace lwm
      */
     template<typename U>
     inline void fill(const U in);
+    /**
+     * @brief return trace of Matrix.
+     */
+    template<typename T_ = T>
+    enable_if_t<M == N, T_> trace() const;
+
+    template<typename _Matrix = Matrix<T, M, N>>
+    enable_if_t<M==1&&N==1, _Matrix> inv() const  {
+      return _Matrix{{T(1)/data[0][0]}};
+    }
+    // template<typename _Matrix = Matrix<T, M, N>>
+    // enable_if_t<M==2&&N==2, _Matrix> inv(type_epsilon_t<T> dmy = ) const  {
+    //   _Matrix res;  
+    //   return res;
+    // }
+    // template<typename _Matrix = Matrix<T, M, N>>
+    // enable_if_t<M==2&&N==2, _Matrix> inv() const;
+    // template<typename _Matrix = Matrix<T, M, N>>
+    // enable_if_t<M==3&&N==3, _Matrix> inv() const;
+    // template<typename _Matrix = Matrix<T, M, N>>
+    // enable_if_t<M>=4&&N>=4&&M==N, _Matrix> inv() const;
 
     /**
      * @brief Mathmatical operations

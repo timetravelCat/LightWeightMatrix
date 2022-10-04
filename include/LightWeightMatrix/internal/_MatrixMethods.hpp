@@ -348,6 +348,15 @@ namespace lwm
         data[i][j] = static_cast<allowed_cast_t<T, U>>(in);
   }
   template<typename T, size_t M, size_t N>
+  template<typename T_>
+  enable_if_t<M == N, T_> Matrix<T, M, N>::trace() const
+  {
+    T res = T(0);
+    for(size_t i = 0; i < M; i++)
+      res += data[i][i];
+    return res;
+  }
+  template<typename T, size_t M, size_t N>
   template<size_t R, size_t C, size_t r, size_t c>
   void Matrix<T, M, N>::size_static_assert()
   {

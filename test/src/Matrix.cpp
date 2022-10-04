@@ -540,4 +540,14 @@ TEST_CASE("Matrix", "[lwm::Matrix]")
     REQUIRE(test_mat_nan2.isAllNan());
     REQUIRE(test_mat_nan2.isAnyNan());
   }
+  SECTION("Trace, inverse")
+  {
+    Matrix<double, 4, 4> wow = Matrix<double, 4, 4>::Constant(2.0);
+    wow[0][0] = 3.0;
+    wow[1][1] = 5.0;
+    REQUIRE(wow.trace() == 2.0 + 2.0 + 3.0 + 5.0);
+    
+     Matrix<double, 1, 1> res{{3.0}};
+     REQUIRE(res.inv()() == 1.0/3.0);
+  }
 }
