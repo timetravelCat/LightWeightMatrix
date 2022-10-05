@@ -603,7 +603,7 @@ namespace lwm
       conditional_t<isConst, const data_array&, data_array&> data_;
       // accessor() = delete;
       // explicit accessor(const accessor&) = delete;
-      accessor(conditional_t<isConst, const data_array&, data_array&> data) : data_{ data }
+      explicit accessor(conditional_t<isConst, const data_array&, data_array&> data) : data_{ data }
       {
       }
       inline T_& operator[](size_t j)
