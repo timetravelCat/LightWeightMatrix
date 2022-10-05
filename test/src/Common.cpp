@@ -41,6 +41,6 @@ TEST_CASE("Common.cpp")
     REQUIRE(!isEpsilon(FLT_EPSILON*2.0f));
     REQUIRE(isEpsilon(DBL_EPSILON));
 
-
+    
   } 
 }

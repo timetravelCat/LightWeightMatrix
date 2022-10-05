@@ -16,12 +16,6 @@ foreach(file ${test_sources})
   add_executable(${test_name}_Tests ${file})
 
   #
-  # Set the compiler standard
-  #
-
-  target_compile_features(${test_name}_Tests PUBLIC cxx_std_11)
-
-  #
   # Setup code coverage if enabled
   #
 

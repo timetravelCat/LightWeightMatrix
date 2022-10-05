@@ -44,7 +44,7 @@ namespace lwm
   template<typename T>
   inline enable_if_t<is_floating_point<T>::value, bool> isEpsilon(const T& val)
   {
-    if(fabs(val) <= type_epsilon_t<T>::type::value)
+    if(fabs(val) <= epsilon<T>())
       return true;
     return false;
   }

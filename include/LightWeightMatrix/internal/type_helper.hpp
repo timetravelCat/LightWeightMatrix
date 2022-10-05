@@ -179,17 +179,20 @@ namespace lwm
       typedef epsilon_ldbl type;
     };
     template<typename T>
-    struct type_epsilon
-    {
-      typedef conditional_t<
-          is_floating_point<T>::value,
-          conditional_t<
-              is_same<T, float>::value,
-              epsilon_flt,
-              conditional_t<is_same<T, double>::value, epsilon_dbl, epsilon_ldbl>>,
-          void> type;
+    constexpr T epsilon() {
+      return T(0);
     };
-    template<typename T>
-    using type_epsilon_t = typename type_epsilon<T>::type;
+    template<>
+    constexpr float epsilon<float>(){
+      return FLT_EPSILON;
+    }
+    template<>
+    constexpr double epsilon<double>(){
+      return DBL_EPSILON;
+    }
+    template<>
+    constexpr long double epsilon<long double>(){
+      return LDBL_EPSILON;
+    }
   };  // namespace internal
 };    // namespace lwm
