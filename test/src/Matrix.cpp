@@ -1,6 +1,8 @@
 #define CATCH_CONFIG_MAIN
 #include <LightWeightMatrix/Matrix.hpp>
 #include <catch2/catch.hpp>
+#include <float.h>
+#include <math.h>
 
 using namespace lwm;
 using namespace lwm::internal;
@@ -339,13 +341,13 @@ TEST_CASE("Matrix", "[lwm::Matrix]")
 
     Matrix<int, 1, 3> test{ { 1, 2, 3 } };
     Matrix<int, 3, 1> test2 = test.toRowVector();
-    REQUIRE(test2[0]==1);
-    REQUIRE(test2[1]==2);
-    REQUIRE(test2[2]==3);
+    REQUIRE(test2[0] == 1);
+    REQUIRE(test2[1] == 2);
+    REQUIRE(test2[2] == 3);
     Matrix<int, 1, 3> test3 = test2.toColVector();
-    REQUIRE(test3[0]==1);
-    REQUIRE(test3[1]==2);
-    REQUIRE(test3[2]==3);
+    REQUIRE(test3[0] == 1);
+    REQUIRE(test3[1] == 2);
+    REQUIRE(test3[2] == 3);
   }
   SECTION("slice")
   {
@@ -501,10 +503,10 @@ TEST_CASE("Matrix", "[lwm::Matrix]")
     // mat__ *= 2.0f;
     // mat__ *= Matrix<double, 2,2>::Identity().cast<float>()*2.0f;
     mat__ *= 2.0f * Matrix<double, 2, 2>::Identity().cast<float>();
-    REQUIRE(mat__[0][0] == static_cast<float>(1.0 * 3.0* 2.0));
-    REQUIRE(mat__[0][1] == static_cast<float>(1.0 * 4.0* 2.0));
-    REQUIRE(mat__[1][0] == static_cast<float>(2.0 * 3.0* 2.0));
-    REQUIRE(mat__[1][1] == static_cast<float>(2.0 * 4.0* 2.0));
+    REQUIRE(mat__[0][0] == static_cast<float>(1.0 * 3.0 * 2.0));
+    REQUIRE(mat__[0][1] == static_cast<float>(1.0 * 4.0 * 2.0));
+    REQUIRE(mat__[1][0] == static_cast<float>(2.0 * 3.0 * 2.0));
+    REQUIRE(mat__[1][1] == static_cast<float>(2.0 * 4.0 * 2.0));
 
     mat__ /= 2.0f;
     REQUIRE(mat__[0][0] == static_cast<float>(1.0 * 3.0));
@@ -512,14 +514,14 @@ TEST_CASE("Matrix", "[lwm::Matrix]")
     REQUIRE(mat__[1][0] == static_cast<float>(2.0 * 3.0));
     REQUIRE(mat__[1][1] == static_cast<float>(2.0 * 4.0));
 
-    Matrix<float, 2, 2> mat___ = Matrix<double,2,2>::Constant(2.0);
+    Matrix<float, 2, 2> mat___ = Matrix<double, 2, 2>::Constant(2.0);
     Matrix<float, 2, 2> mat____ = mat___.elementWiseMultiply(Matrix<double, 2, 2>::Constant(2.0).cast<float>());
     REQUIRE(mat____[0][0] == 4.0f);
     REQUIRE(mat____[0][1] == 4.0f);
     REQUIRE(mat____[1][0] == 4.0f);
     REQUIRE(mat____[1][1] == 4.0f);
 
-    Matrix<double, 2, 2> test_mat{{-1.0, 3.0, 4.0, 2.0}};
+    Matrix<double, 2, 2> test_mat{ { -1.0, 3.0, 4.0, 2.0 } };
     Matrix<double, 2, 2> test_mat_abs = test_mat.abs();
     REQUIRE(test_mat_abs[0][0] == 1.0);
     REQUIRE(test_mat_abs[0][1] == 3.0);
@@ -528,7 +530,7 @@ TEST_CASE("Matrix", "[lwm::Matrix]")
     REQUIRE(test_mat.max() == 4.0);
     REQUIRE(test_mat.min() == -1.0);
 
-    Matrix<float, 2, 2> test_mat_nan1{{-1.0f, 2.0f, 4.0f, 2.0f}};
+    Matrix<float, 2, 2> test_mat_nan1{ { -1.0f, 2.0f, 4.0f, 2.0f } };
     REQUIRE(test_mat_nan1.max() == 4.0f);
     REQUIRE(test_mat_nan1.min() == -1.0f);
     REQUIRE(!test_mat_nan1.isAllNan());
@@ -536,7 +538,7 @@ TEST_CASE("Matrix", "[lwm::Matrix]")
     REQUIRE(!test_mat_nan1.isAllNan());
     REQUIRE(test_mat_nan1.isAnyNan());
 
-    Matrix<float, 2, 2> test_mat_nan2{{-NAN, NAN, NAN, NAN}};
+    Matrix<float, 2, 2> test_mat_nan2{ { -NAN, NAN, NAN, NAN } };
     REQUIRE(test_mat_nan2.isAllNan());
     REQUIRE(test_mat_nan2.isAnyNan());
   }
@@ -546,8 +548,30 @@ TEST_CASE("Matrix", "[lwm::Matrix]")
     wow[0][0] = 3.0;
     wow[1][1] = 5.0;
     REQUIRE(wow.trace() == 2.0 + 2.0 + 3.0 + 5.0);
-    
-     Matrix<double, 1, 1> res{{3.0}};
-     REQUIRE(res.inv()() == 1.0/3.0);
+
+    Matrix<double, 1, 1> test{ { 3.0 } };
+    REQUIRE(test.inv()() == 1.0 / 3.0);
+    test() = NAN;
+    REQUIRE(isnan(test.inv()()));
+    test() = INFINITY;
+    REQUIRE(isnan(test.inv()()));
+
+
+    Matrix<double, 2, 2> test2{{1.0,2.0,3.0,4.0}};
+    Matrix<double, 2, 2> test2_inv = test2.inv();
+    double det = test2[0][0]*test2[1][1]-test2[1][0]*test2[0][1];
+    printf("%f, %f \n", test2_inv[0][0], test2[1][1]/det);
+    REQUIRE((test2_inv[0][0] == test2[1][1]/det));
+    REQUIRE((test2_inv[0][1] == -test2[0][1]/det));
+    REQUIRE((test2_inv[1][0] == -test2[1][0]/det));
+    REQUIRE((test2_inv[1][1] == test2[0][0]/det));
+
+
+    Matrix<double, 2, 2> test3{{nan(""),2.0,3.0,4.0}};
+    test3 = test3.inv();
+    REQUIRE(isnan(test3[0][0]));
+    REQUIRE(isnan(test3[0][1]));
+    REQUIRE(isnan(test3[1][0]));
+    REQUIRE(isnan(test3[1][1]));
   }
 }

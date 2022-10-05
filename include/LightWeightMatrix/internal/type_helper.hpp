@@ -170,25 +170,24 @@ namespace lwm
     };
     struct epsilon_dbl
     {
-      static constexpr float value = DBL_EPSILON;
+      static constexpr double value = DBL_EPSILON;
       typedef epsilon_dbl type;
     };
     struct epsilon_ldbl
     {
-      static constexpr float value = LDBL_EPSILON;
+      static constexpr long double value = LDBL_EPSILON;
       typedef epsilon_ldbl type;
     };
     template<typename T>
-    struct type_epsilon : enable_if<
-                              is_floating_point<T>::value,
-                              conditional_t<
-                                  is_same<T, float>::value,
-                                  epsilon_flt,
-                                  conditional_t<
-                                      is_same<T, double>::value,
-                                      epsilon_dbl,
-                                      epsilon_ldbl>>>
+    struct type_epsilon
     {
+      typedef conditional_t<
+          is_floating_point<T>::value,
+          conditional_t<
+              is_same<T, float>::value,
+              epsilon_flt,
+              conditional_t<is_same<T, double>::value, epsilon_dbl, epsilon_ldbl>>,
+          void> type;
     };
     template<typename T>
     using type_epsilon_t = typename type_epsilon<T>::type;

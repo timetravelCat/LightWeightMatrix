@@ -225,3 +225,14 @@ TEMPLATE_PRODUCT_TEST_CASE(
     REQUIRE(is_same<typename TestType::type_1, float>::value == true);
     REQUIRE(is_same<typename TestType::type_2, double>::value == true);
 }
+
+TEST_CASE("type_epsilon testing", "[lwm::internal::type_epsilon]")
+{
+  REQUIRE(is_same<type_epsilon<int>::type, void>::value == true);
+  REQUIRE(is_same<type_epsilon<uint32_t>::type, void>::value == true);
+  REQUIRE(is_same<type_epsilon<float>::type, void>::value == false);
+  REQUIRE(is_same<type_epsilon<double>::type, void>::value == false);
+  REQUIRE(type_epsilon<float>::type::value == FLT_EPSILON);
+  REQUIRE(type_epsilon<double>::type::value == DBL_EPSILON);
+  REQUIRE(type_epsilon<long double>::type::value == LDBL_EPSILON);
+}

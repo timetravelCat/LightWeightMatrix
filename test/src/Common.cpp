@@ -27,5 +27,20 @@ TEST_CASE("Common.cpp")
     REQUIRE(isSame(INFINITY, INFINITY));
     REQUIRE(isSame(-INFINITY, -INFINITY));
     REQUIRE(!isSame(INFINITY, -INFINITY));
+
+    REQUIRE(isFinite(1.0));
+    REQUIRE(!isFinite(nanf("")));
+    REQUIRE(!isFinite(INFINITY));
+    REQUIRE(!isFinite(double(INFINITY)));
+    REQUIRE(!isFinite(NAN));
+    REQUIRE(!isFinite(double(NAN)));
+    
+    REQUIRE(isEpsilon(LDBL_EPSILON));
+    REQUIRE(isEpsilon(FLT_EPSILON));
+    REQUIRE(isEpsilon(FLT_EPSILON/2.0f));
+    REQUIRE(!isEpsilon(FLT_EPSILON*2.0f));
+    REQUIRE(isEpsilon(DBL_EPSILON));
+
+
   } 
 }

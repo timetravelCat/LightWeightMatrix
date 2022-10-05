@@ -19,19 +19,33 @@ namespace lwm
 {
   using namespace lwm::internal;
   template<typename A, typename B>
-  enable_if_t<are_fixed_point<A, B>::value, bool> isSame(const A a, const B b)
+  inline enable_if_t<are_fixed_point<A, B>::value, bool> isSame(const A& a, const B& b)
   {
     return (a == b);
   }
   template<typename A, typename B>
   enable_if_t<are_floating_point<A, B>::value, bool>
-  isSame(const A a, const B b, const implicit_cast_floating_point_t<A, B> eps = implicit_cast_floating_point_t<A, B>(1e-4))
+  inline isSame(const A& a, const B& b, const implicit_cast_floating_point_t<A, B> eps = implicit_cast_floating_point_t<A, B>(1e-4))
   {
     return (fabs(a - b) <= eps) || (isnan(a) && isnan(b)) || (isinf(a) && isinf(b) && isnan(a - b));
   }
   template<typename A, typename B>
-  enable_if_t<include_fixed_point<A, B>::value && include_floating_point<A, B>::value, bool> isSame(const A, const B)
+  inline enable_if_t<include_fixed_point<A, B>::value && include_floating_point<A, B>::value, bool> isSame(const A&, const B&)
   {
+    return false;
+  }
+  template<typename T>
+  inline enable_if_t<is_floating_point<T>::value, bool> isFinite(const T& val)
+  {
+    if(isinf(val) || isnan(val))
+      return false;
+    return true;
+  }
+  template<typename T>
+  inline enable_if_t<is_floating_point<T>::value, bool> isEpsilon(const T& val)
+  {
+    if(fabs(val) <= type_epsilon_t<T>::type::value)
+      return true;
     return false;
   }
 };  // namespace lwm
