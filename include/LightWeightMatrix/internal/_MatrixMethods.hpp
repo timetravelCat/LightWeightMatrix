@@ -295,6 +295,41 @@ namespace lwm
     for (size_t i = 0; i < L; i++)
       data[r][i] = static_cast<allowed_cast_t<T, U>>(in[i]);
   }
+
+  template<typename T, size_t M, size_t N>
+  void Matrix<T, M, N>::swapRow(const size_t& a, const size_t& b)
+  {
+    assert(a < M);
+    assert(b < M);
+
+    if (a == b)
+      return;
+
+    for (size_t j = 0; j < N; j++)
+    {
+      const T tmp = data[a][j];
+      data[a][j] = data[b][j];
+      data[b][j] = tmp;
+    }
+  }
+
+  template<typename T, size_t M, size_t N>
+  void Matrix<T, M, N>::swapCol(const size_t& a, const size_t& b)
+  {
+    assert(a < N);
+    assert(b < N);
+
+    if (a == b)
+      return;
+
+    for (size_t i = 0; i < M; i++)
+    {
+      const T tmp = data[i][a];
+      data[i][a] = data[i][b];
+      data[i][b] = tmp;
+    }
+  }
+
   template<typename T, size_t M, size_t N>
   template<typename T_>
   enable_if_t<M == 1, Matrix<T_, N, 1>> Matrix<T, M, N>::toRowVector() const
@@ -352,7 +387,7 @@ namespace lwm
   enable_if_t<M == N, T_> Matrix<T, M, N>::trace() const
   {
     T res = T(0);
-    for(size_t i = 0; i < M; i++)
+    for (size_t i = 0; i < M; i++)
       res += data[i][i];
     return res;
   }

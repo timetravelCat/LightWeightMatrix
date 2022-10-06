@@ -218,6 +218,15 @@ namespace lwm
     inline void setRow(size_t r, const U (&in)[L]);
 
     /**
+     * @brief Swap Row
+     */
+    inline void swapRow(const size_t& a, const size_t& b);
+    /**
+     * @brief Swap Col
+     */
+    inline void swapCol(const size_t& a, const size_t& b);
+    
+    /**
      * @brief if ColumnVector, converts to row vector (transpose)
      */
     template<typename T_ = T>
@@ -331,9 +340,9 @@ namespace lwm
       //     }
       //   }
 
-      //   if (isEpsilon(U(n, n)) 
+      //   if (isEpsilon(U(n, n))
       //     return Matrix::NaN();
-        
+
       //   for (size_t i = (n + 1); i < M; i++) {
       //     L(i, n) = U(i, n) / U(n, n);
       //     for (size_t k = n; k < M; k++)

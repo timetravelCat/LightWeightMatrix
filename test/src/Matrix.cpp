@@ -1,8 +1,9 @@
 #define CATCH_CONFIG_MAIN
-#include <LightWeightMatrix/Matrix.hpp>
-#include <catch2/catch.hpp>
 #include <float.h>
 #include <math.h>
+
+#include <LightWeightMatrix/Matrix.hpp>
+#include <catch2/catch.hpp>
 
 using namespace lwm;
 using namespace lwm::internal;
@@ -200,7 +201,7 @@ TEST_CASE("Matrix", "[lwm::Matrix]")
     REQUIRE(matrix_[0][1] == 2.0f);
     REQUIRE(matrix_[1][1] == 2.0f);
   }
-  SECTION("fill, setRow, setCol")
+  SECTION("fill, setRow, setCol, swap")
   {
     Matrix<double, 2, 3> matrix;
     matrix.fill(10.0f);
@@ -309,6 +310,24 @@ TEST_CASE("Matrix", "[lwm::Matrix]")
     matrix.setCol(1, { 4.0, 4.0 });
     for (int j = 0; j < 2; j++)
       REQUIRE(matrix[j][1] == 4.0);
+
+    Matrix<double, 2, 2> swap_test{ { 1.0, 2.0, 3.0, 4.0 } };
+    swap_test.swapCol(0, 1);
+    REQUIRE(swap_test[0][0] == 2.0);
+    REQUIRE(swap_test[0][1] == 1.0);
+    REQUIRE(swap_test[1][0] == 4.0);
+    REQUIRE(swap_test[1][1] == 3.0);
+    swap_test.swapCol(0, 1);
+    REQUIRE(swap_test[0][0] == 1.0);
+    REQUIRE(swap_test[0][1] == 2.0);
+    REQUIRE(swap_test[1][0] == 3.0);
+    REQUIRE(swap_test[1][1] == 4.0);
+    swap_test.swapRow(0, 1);
+    REQUIRE(swap_test[0][0] == 3.0);
+    REQUIRE(swap_test[0][1] == 4.0);
+    REQUIRE(swap_test[1][0] == 1.0);
+    REQUIRE(swap_test[1][1] == 2.0);
+
   }
   SECTION("transpose & cast & toRowVector, to toColVector")
   {
@@ -556,18 +575,16 @@ TEST_CASE("Matrix", "[lwm::Matrix]")
     test() = INFINITY;
     REQUIRE(isnan(test.inv()()));
 
-
-    Matrix<double, 2, 2> test2{{1.0,2.0,3.0,4.0}};
+    Matrix<double, 2, 2> test2{ { 1.0, 2.0, 3.0, 4.0 } };
     Matrix<double, 2, 2> test2_inv = test2.inv();
-    double det = test2[0][0]*test2[1][1]-test2[1][0]*test2[0][1];
-    printf("%f, %f \n", test2_inv[0][0], test2[1][1]/det);
-    REQUIRE((test2_inv[0][0] == test2[1][1]/det));
-    REQUIRE((test2_inv[0][1] == -test2[0][1]/det));
-    REQUIRE((test2_inv[1][0] == -test2[1][0]/det));
-    REQUIRE((test2_inv[1][1] == test2[0][0]/det));
+    double det = test2[0][0] * test2[1][1] - test2[1][0] * test2[0][1];
+    printf("%f, %f \n", test2_inv[0][0], test2[1][1] / det);
+    REQUIRE((test2_inv[0][0] == test2[1][1] / det));
+    REQUIRE((test2_inv[0][1] == -test2[0][1] / det));
+    REQUIRE((test2_inv[1][0] == -test2[1][0] / det));
+    REQUIRE((test2_inv[1][1] == test2[0][0] / det));
 
-
-    Matrix<double, 2, 2> test3{{nan(""),2.0,3.0,4.0}};
+    Matrix<double, 2, 2> test3{ { nan(""), 2.0, 3.0, 4.0 } };
     test3 = test3.inv();
     REQUIRE(isnan(test3[0][0]));
     REQUIRE(isnan(test3[0][1]));
