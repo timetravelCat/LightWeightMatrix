@@ -225,7 +225,7 @@ namespace lwm
      * @brief Swap Col
      */
     inline void swapCol(const size_t& a, const size_t& b);
-    
+
     /**
      * @brief if ColumnVector, converts to row vector (transpose)
      */
@@ -273,109 +273,22 @@ namespace lwm
      * @brief Returns inverse of the matrix 1x1. if not valid, return NaN matrix.
      */
     template<typename T_ = T, enable_if_t<M == N && is_floating_point<T_>::value && M == 1, void*> = nullptr>
-    Matrix inv() const
-    {
-      if (!isFinite(data[0][0]) || isEpsilon(data[0][0]))
-        return Matrix{ { NAN } };
-      return Matrix{ { T(1.0) / data[0][0] } };
-    }
+    Matrix inv() const;
     /**
      * @brief Returns inverse of the matrix 1x1. if not valid, return NaN matrix.
      */
     template<typename T_ = T, enable_if_t<M == N && is_floating_point<T_>::value && M == 2, void*> = nullptr>
-    Matrix inv() const
-    {
-      const T det = data[0][0] * data[1][1] - data[1][0] * data[0][1];
-      if (!isFinite(det) || isEpsilon(det))
-        return Matrix::NaN();
-      return Matrix{ { data[1][1] / det, -data[0][1] / det, -data[1][0] / det, data[0][0] / det } };
-    }
+    Matrix inv() const;
     /**
      * @brief Returns inverse of the matrix 1x1. if not valid, return NaN matrix.
      */
     template<typename T_ = T, enable_if_t<M == N && is_floating_point<T_>::value && M == 3, void*> = nullptr>
-    Matrix inv() const
-    {
-      const T det = data[0][0] * (data[1][1] * data[2][2] - data[2][1] * data[1][2]) -
-                    data[0][1] * (data[1][0] * data[2][2] - data[1][2] * data[2][0]) +
-                    data[0][2] * (data[1][0] * data[2][1] - data[1][1] * data[2][0]);
-      if (!isFinite(det) || isEpsilon(det))
-        return Matrix::NaN();
-      Matrix res;
-      res.data[0][0] = (data[1][1] * data[2][2] - data[2][1] * data[1][2]) / det;
-      res.data[0][1] = (data[0][2] * data[2][1] - data[0][1] * data[2][2]) / det;
-      res.data[0][2] = (data[0][1] * data[1][2] - data[0][2] * data[1][1]) / det;
-      res.data[1][0] = (data[1][2] * data[2][0] - data[1][0] * data[2][2]) / det;
-      res.data[1][1] = (data[0][0] * data[2][2] - data[0][2] * data[2][0]) / det;
-      res.data[1][2] = (data[1][0] * data[0][2] - data[0][0] * data[1][2]) / det;
-      res.data[2][0] = (data[1][0] * data[2][1] - data[2][0] * data[1][1]) / det;
-      res.data[2][1] = (data[2][0] * data[0][1] - data[0][0] * data[2][1]) / det;
-      res.data[2][2] = (data[0][0] * data[1][1] - data[1][0] * data[0][1]) / det;
-      return res;
-    }
+    Matrix inv() const;
     /**
      * @brief Returns inverse of the matrix 1x1. if not valid, return NaN matrix.
      */
     template<typename T_ = T, enable_if_t<M == N && is_floating_point<T_>::value && (M > 3), void*> = nullptr>
-    Matrix inv() const
-    {
-      Matrix L = Matrix::Identity();
-      Matrix U = (*this);
-      Matrix P = Matrix::Identity();
-
-      // for (size_t n = 0; n < M; n++)
-      // {
-      //   if (isEpsilon(U(n, n)))
-      //   {
-      //     for (size_t i = n + 1; i < M; i++)
-      //     {
-      //       if (!isEpsilon(U(i, n)))
-      //       {
-      //         U.swapRows(i, n);
-      //         P.swapRows(i, n);
-      //         L.swapRows(i, n);
-      //         L.swapCols(i, n);
-      //         break;
-      //       }
-      //     }
-      //   }
-
-      //   if (isEpsilon(U(n, n))
-      //     return Matrix::NaN();
-
-      //   for (size_t i = (n + 1); i < M; i++) {
-      //     L(i, n) = U(i, n) / U(n, n);
-      //     for (size_t k = n; k < M; k++)
-      //     {
-      //       U(i, k) -= L(i, n) * U(n, k);
-      //     }
-      //   }
-      // }
-
-      // for (size_t c = 0; c < M; c++)
-      //   for (size_t i = 0; i < M; i++)
-      //     for (size_t j = 0; j < i; j++)
-      //       P(i, c) -= L(i, j) * P(j, c);
-
-      // for (size_t c = 0; c < M; c++)
-      // {
-      //   for (size_t k = 0; k < M; k++)
-      //   {
-      //     size_t i = M - 1 - k;
-      //     for (size_t j = i + 1; j < M; j++)
-      //     {
-      //       P(i, c) -= U(i, j) * P(j, c);
-      //     }
-      //     P(i, c) /= U(i, i);
-      //   }
-      // }
-      // for (size_t i = 0; i < M; i++)
-      //   for (size_t j = 0; j < M; j++)
-      //     if (!isFinite(P(i, j)))
-      //       return Matrix::NaN();
-
-      return P;
-    }
+    Matrix inv() const;
 
     /**
      * @brief Mathmatical operations

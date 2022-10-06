@@ -392,6 +392,108 @@ namespace lwm
     return res;
   }
   template<typename T, size_t M, size_t N>
+  template<typename T_, enable_if_t<M == N && is_floating_point<T_>::value && M == 1, void*>>
+  Matrix<T, M, N> Matrix<T, M, N>::inv() const
+  {
+    if (!isFinite(data[0][0]) || isEpsilon(data[0][0]))
+      return Matrix<T, M, N>{ { NAN } };
+    return Matrix<T, M, N>{ { T(1.0) / data[0][0] } };
+  }
+  template<typename T, size_t M, size_t N>
+  template<typename T_, enable_if_t<M == N && is_floating_point<T_>::value && M == 2, void*>>
+  Matrix<T, M, N> Matrix<T, M, N>::inv() const
+  {
+    const T det = data[0][0] * data[1][1] - data[1][0] * data[0][1];
+    if (!isFinite(det) || isEpsilon(det))
+      return Matrix<T, M, N>::NaN();
+    return Matrix<T, M, N>{ { data[1][1] / det, -data[0][1] / det, -data[1][0] / det, data[0][0] / det } };
+  }
+  template<typename T, size_t M, size_t N>
+  template<typename T_, enable_if_t<M == N && is_floating_point<T_>::value && M == 3, void*>>
+  Matrix<T, M, N> Matrix<T, M, N>::inv() const
+  {
+    const T det = data[0][0] * (data[1][1] * data[2][2] - data[2][1] * data[1][2]) -
+                  data[0][1] * (data[1][0] * data[2][2] - data[1][2] * data[2][0]) +
+                  data[0][2] * (data[1][0] * data[2][1] - data[1][1] * data[2][0]);
+    if (!isFinite(det) || isEpsilon(det))
+      return Matrix<T, M, N>::NaN();
+    Matrix<T, M, N> res;
+    res.data[0][0] = (data[1][1] * data[2][2] - data[2][1] * data[1][2]) / det;
+    res.data[0][1] = (data[0][2] * data[2][1] - data[0][1] * data[2][2]) / det;
+    res.data[0][2] = (data[0][1] * data[1][2] - data[0][2] * data[1][1]) / det;
+    res.data[1][0] = (data[1][2] * data[2][0] - data[1][0] * data[2][2]) / det;
+    res.data[1][1] = (data[0][0] * data[2][2] - data[0][2] * data[2][0]) / det;
+    res.data[1][2] = (data[1][0] * data[0][2] - data[0][0] * data[1][2]) / det;
+    res.data[2][0] = (data[1][0] * data[2][1] - data[2][0] * data[1][1]) / det;
+    res.data[2][1] = (data[2][0] * data[0][1] - data[0][0] * data[2][1]) / det;
+    res.data[2][2] = (data[0][0] * data[1][1] - data[1][0] * data[0][1]) / det;
+    return res;
+  }
+
+  template<typename T, size_t M, size_t N>
+  template<typename T_, enable_if_t<M == N && is_floating_point<T_>::value && (M > 3), void*>>
+  Matrix<T, M, N> Matrix<T, M, N>::inv() const
+  {
+    Matrix<T, M, N> L = Matrix<T, M, N>::Identity();
+    Matrix<T, M, N> U = (*this);
+    Matrix<T, M, N> P = Matrix<T, M, N>::Identity();
+
+    for (size_t n = 0; n < M; n++)
+    {
+      if (isEpsilon(U(n, n)))
+      {
+        for (size_t i = n + 1; i < M; i++)
+        {
+          if (!isEpsilon(U(i, n)))
+          {
+            U.swapRow(i, n);
+            P.swapRow(i, n);
+            L.swapRow(i, n);
+            L.swapCol(i, n);
+            break;
+          }
+        }
+      }
+
+      if (isEpsilon(U(n, n)))
+        return Matrix<T, M, N>::NaN();
+
+      for (size_t i = (n + 1); i < M; i++)
+      {
+        L(i, n) = U(i, n) / U(n, n);
+        for (size_t k = n; k < M; k++)
+        {
+          U(i, k) -= L(i, n) * U(n, k);
+        }
+      }
+    }
+
+    for (size_t c = 0; c < M; c++)
+      for (size_t i = 0; i < M; i++)
+        for (size_t j = 0; j < i; j++)
+          P(i, c) -= L(i, j) * P(j, c);
+
+    for (size_t c = 0; c < M; c++)
+    {
+      for (size_t k = 0; k < M; k++)
+      {
+        size_t i = M - 1 - k;
+        for (size_t j = i + 1; j < M; j++)
+        {
+          P(i, c) -= U(i, j) * P(j, c);
+        }
+        P(i, c) /= U(i, i);
+      }
+    }
+    for (size_t i = 0; i < M; i++)
+      for (size_t j = 0; j < M; j++)
+        if (!isFinite(P(i, j)))
+          return Matrix<T, M, N>::NaN();
+
+    return P;
+  }
+
+  template<typename T, size_t M, size_t N>
   template<size_t R, size_t C, size_t r, size_t c>
   void Matrix<T, M, N>::size_static_assert()
   {
