@@ -163,21 +163,6 @@ namespace lwm
     {
       static const T value = (T1 > T2) ? T1 : T2;
     };
-    struct epsilon_flt
-    {
-      static constexpr float value = FLT_EPSILON;
-      typedef epsilon_flt type;
-    };
-    struct epsilon_dbl
-    {
-      static constexpr double value = DBL_EPSILON;
-      typedef epsilon_dbl type;
-    };
-    struct epsilon_ldbl
-    {
-      static constexpr long double value = LDBL_EPSILON;
-      typedef epsilon_ldbl type;
-    };
     template<typename T>
     constexpr T epsilon() {
       return T(0);

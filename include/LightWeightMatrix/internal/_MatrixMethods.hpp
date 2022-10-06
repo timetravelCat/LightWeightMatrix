@@ -429,7 +429,6 @@ namespace lwm
     res.data[2][2] = (data[0][0] * data[1][1] - data[1][0] * data[0][1]) / det;
     return res;
   }
-
   template<typename T, size_t M, size_t N>
   template<typename T_, enable_if_t<M == N && is_floating_point<T_>::value && (M > 3), void*>>
   Matrix<T, M, N> Matrix<T, M, N>::inv() const
@@ -492,7 +491,154 @@ namespace lwm
 
     return P;
   }
+  template<typename T, size_t M, size_t N>
+  template<typename T_, enable_if_t<M == N && is_floating_point<T_>::value, void*>>
+  Matrix<T, M, N> Matrix<T, M, N>::inv(size_t rank) const
+  {
+    Matrix<T, M, N> L = Matrix<T, M, N>::Identity();
+    Matrix<T, M, N> U = (*this);
+    Matrix<T, M, N> P = Matrix<T, M, N>::Identity();
 
+    for (size_t n = 0; n < rank; n++)
+    {
+      if (isEpsilon(U(n, n)))
+      {
+        for (size_t i = n + 1; i < rank; i++)
+        {
+          if (!isEpsilon(U(i, n)))
+          {
+            U.swapRow(i, n);
+            P.swapRow(i, n);
+            L.swapRow(i, n);
+            L.swapCol(i, n);
+            break;
+          }
+        }
+      }
+
+      if (isEpsilon(U(n, n)))
+        return Matrix<T, M, N>::NaN();
+
+      for (size_t i = (n + 1); i < rank; i++)
+      {
+        L(i, n) = U(i, n) / U(n, n);
+        for (size_t k = n; k < rank; k++)
+        {
+          U(i, k) -= L(i, n) * U(n, k);
+        }
+      }
+    }
+
+    for (size_t c = 0; c < rank; c++)
+      for (size_t i = 0; i < rank; i++)
+        for (size_t j = 0; j < i; j++)
+          P(i, c) -= L(i, j) * P(j, c);
+
+    for (size_t c = 0; c < rank; c++)
+    {
+      for (size_t k = 0; k < rank; k++)
+      {
+        size_t i = rank - 1 - k;
+        for (size_t j = i + 1; j < rank; j++)
+        {
+          P(i, c) -= U(i, j) * P(j, c);
+        }
+        P(i, c) /= U(i, i);
+      }
+    }
+    for (size_t i = 0; i < rank; i++)
+      for (size_t j = 0; j < rank; j++)
+        if (!isFinite(P(i, j)))
+          return Matrix<T, M, N>::NaN();
+
+    return P;
+  }
+
+  template<typename T, size_t M, size_t N>
+  template<typename T_, enable_if_t<M == N && is_floating_point<T_>::value, void*>>
+  Matrix<T, M, 1> Matrix<T, M, N>::diag() const
+  {
+    Matrix<T, M, 1> res;
+    for (size_t i = 0; i < M; i++)
+      res.data[i][0] = data[i][i];
+    return res;
+  }
+  template<typename T, size_t M, size_t N>
+  template<typename T_, enable_if_t<M == N && is_floating_point<T_>::value, void*>>
+  Matrix<T, M, N> Matrix<T, M, N>::choleskyDecomposition(size_t& rank) const
+  {
+    const T tol = M * epsilon<T>() * diag().max();
+    Matrix<T, N, N> L;
+
+    size_t r = 0;
+    for (size_t k = 0; k < N; k++)
+    {
+      if (r == 0)
+      {
+        for (size_t i = k; i < N; i++)
+          L.data[i][r] = data[i][k];
+      }
+      else
+      {
+        for (size_t i = k; i < N; i++)
+        {
+          T LL = T();
+          for (size_t j = 0; j < r; j++)
+            LL += L.data[i][j] * L.data[k][j];
+
+          L.data[i][r] = data[i][k] - LL;
+        }
+      }
+      if (L.data[k][r] > tol)
+      {
+        L.data[k][r] = sqrt(L.data[k][r]);
+        if (k < N - 1)
+          for (size_t i = k + 1; i < N; i++)
+            L.data[i][r] = L.data[i][r] / L.data[k][r];
+
+        r = r + 1;
+      }
+    }
+
+    // Return rank
+    rank = r;
+
+    return L;
+  }
+  template<typename T, size_t M, size_t N>
+  Matrix<T, N, M> Matrix<T, M, N>::pinv() const
+  {
+    if (M <= N)
+    {
+      size_t rank;
+      Matrix<T, M, M> A = (*this) * transpose();
+      Matrix<T, M, M> L = A.choleskyDecomposition(rank);
+
+      A = L.transpose() * L;
+      Matrix<T, M, M> X = A.inv(rank);
+      if (X.isAnyNan())
+        return Matrix<T, N, M>::NaN();  // LCOV_EXCL_LINE -- this can only be hit from numerical issues
+
+      // doing an intermediate assignment reduces stack usage
+      A = X * X * L.transpose();
+      return transpose() * (L * A);
+    }
+    else
+    {
+      size_t rank;
+      Matrix<T, N, N> A = transpose() * (*this);
+      Matrix<T, N, N> L = A.choleskyDecomposition(rank);
+
+      A = L.transpose() * L;
+      Matrix<T, N, N> X = A.inv(rank);
+      if (X.isAnyNan())
+        return Matrix<T, N, M>::NaN();  // LCOV_EXCL_LINE -- this can only be hit from numerical issues
+
+      // doing an intermediate assignment reduces stack usage
+      A = X * X * L.transpose();
+      return (L * A) * transpose();
+    }
+  }
   template<typename T, size_t M, size_t N>
   template<size_t R, size_t C, size_t r, size_t c>
   void Matrix<T, M, N>::size_static_assert()

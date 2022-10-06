@@ -327,7 +327,6 @@ TEST_CASE("Matrix", "[lwm::Matrix]")
     REQUIRE(swap_test[0][1] == 4.0);
     REQUIRE(swap_test[1][0] == 1.0);
     REQUIRE(swap_test[1][1] == 2.0);
-
   }
   SECTION("transpose & cast & toRowVector, to toColVector")
   {
@@ -578,7 +577,6 @@ TEST_CASE("Matrix", "[lwm::Matrix]")
     Matrix<double, 2, 2> test2{ { 1.0, 2.0, 3.0, 4.0 } };
     Matrix<double, 2, 2> test2_inv = test2.inv();
     double det = test2[0][0] * test2[1][1] - test2[1][0] * test2[0][1];
-    printf("%f, %f \n", test2_inv[0][0], test2[1][1] / det);
     REQUIRE((test2_inv[0][0] == test2[1][1] / det));
     REQUIRE((test2_inv[0][1] == -test2[0][1] / det));
     REQUIRE((test2_inv[1][0] == -test2[1][0] / det));
@@ -590,5 +588,36 @@ TEST_CASE("Matrix", "[lwm::Matrix]")
     REQUIRE(isnan(test3[0][1]));
     REQUIRE(isnan(test3[1][0]));
     REQUIRE(isnan(test3[1][1]));
+  }
+  SECTION("diag, cholesky decomposition, Moore-Penrose Inverse")
+  {
+    Matrix<double, 3UL, 1UL> diag = Matrix<double, 3, 3>{ { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0 } }.diag();
+    REQUIRE(diag[0] == 1.0);
+    REQUIRE(diag[1] == 5.0);
+    REQUIRE(diag[2] == 9.0);
+
+    size_t rank;
+    Matrix<double, 3UL, 3UL> cholesky =
+        Matrix<double, 3UL, 3UL>{ { 4.0, 12.0, -16.0, 12.0, 37.0, -43.0, -16.0, -43.0, 98.0 } }.choleskyDecomposition(rank);
+
+    REQUIRE(rank == 3);
+    REQUIRE(cholesky[0][0] == 2.0);
+    REQUIRE(cholesky[0][1] == 0.0);
+    REQUIRE(cholesky[0][2] == 0.0);
+    REQUIRE(cholesky[1][0] == 6.0);
+    REQUIRE(cholesky[1][1] == 1.0);
+    REQUIRE(cholesky[1][2] == 0.0);
+    REQUIRE(cholesky[2][0] == -8.0);
+    REQUIRE(cholesky[2][1] == 5.0);
+    REQUIRE(cholesky[2][2] == 3.0);
+
+    Matrix<double, 3, 2> pinv = Matrix<double, 2, 3>{ { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0 } }.pinv();
+
+    REQUIRE(isSame(pinv[0][0], -17.0/18.0));
+    REQUIRE(isSame(pinv[0][1], 8.0/18.0));
+    REQUIRE(isSame(pinv[1][0], -2.0/18.0));
+    REQUIRE(isSame(pinv[1][1], 2.0/18.0));
+    REQUIRE(isSame(pinv[2][0], 13.0/18.0));
+    REQUIRE(isSame(pinv[2][1], -4.0/18.0));
   }
 }

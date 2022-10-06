@@ -289,7 +289,22 @@ namespace lwm
      */
     template<typename T_ = T, enable_if_t<M == N && is_floating_point<T_>::value && (M > 3), void*> = nullptr>
     Matrix inv() const;
-
+    template<typename T_ = T, enable_if_t<M == N && is_floating_point<T_>::value, void*> = nullptr>
+    Matrix inv(size_t rank) const;
+    /**
+     * @brief return column vector composed of diagonal members
+     */
+    template<typename T_ = T, enable_if_t<M == N && is_floating_point<T_>::value, void*> = nullptr>
+    Matrix<T, M, 1> diag() const;
+    /**
+     * @brief return CholeskyDecomposition with Rank. return lower triangular matrix
+     */
+    template<typename T_ = T, enable_if_t<M == N && is_floating_point<T_>::value, void*> = nullptr>
+    Matrix choleskyDecomposition(size_t& rank) const;
+    /**
+     * @brief Fast Computation of Moore-Penrose Inverse Matrices, 8(2), 25–29. http://arxiv.org/abs/0804.4809
+     */
+    Matrix<T, N, M> pinv() const;
     /**
      * @brief Mathmatical operations
      */
