@@ -613,11 +613,37 @@ TEST_CASE("Matrix", "[lwm::Matrix]")
 
     Matrix<double, 3, 2> pinv = Matrix<double, 2, 3>{ { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0 } }.pinv();
 
-    REQUIRE(isSame(pinv[0][0], -17.0/18.0));
-    REQUIRE(isSame(pinv[0][1], 8.0/18.0));
-    REQUIRE(isSame(pinv[1][0], -2.0/18.0));
-    REQUIRE(isSame(pinv[1][1], 2.0/18.0));
-    REQUIRE(isSame(pinv[2][0], 13.0/18.0));
-    REQUIRE(isSame(pinv[2][1], -4.0/18.0));
+    REQUIRE(isSame(pinv[0][0], -17.0 / 18.0));
+    REQUIRE(isSame(pinv[0][1], 8.0 / 18.0));
+    REQUIRE(isSame(pinv[1][0], -2.0 / 18.0));
+    REQUIRE(isSame(pinv[1][1], 2.0 / 18.0));
+    REQUIRE(isSame(pinv[2][0], 13.0 / 18.0));
+    REQUIRE(isSame(pinv[2][1], -4.0 / 18.0));
   }
+
+  SECTION("Rotation Matrix")
+  {
+    Matrix<double, 3UL, 3UL> rotmat{ { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0 } };
+    auto vee = rotmat.vee();
+    REQUIRE(vee[0] == -rotmat[1][2]);
+    REQUIRE(vee[1] == rotmat[0][2]);
+    REQUIRE(vee[2] == -rotmat[0][1]);
+  }
+  SECTION("Vector Operations")
+  {
+     Matrix<double, 3UL, 1UL> l{{1.0, 2.0, 3.0}};
+     Matrix<double, 3UL, 1UL> r{{2.0, 3.0, 4.0}};
+     REQUIRE(l.dot(r) == 1.0*2.0+2.0*3.0+3.0*4.0);
+     REQUIRE(l.norm() == sqrt(1.0*1.0+2.0*2.0+3.0*3.0));
+     REQUIRE(l.normSquared() == (1.0*1.0+2.0*2.0+3.0*3.0));
+
+
+    Matrix<double, 3UL, 1UL> mat = Matrix<double, 3UL, 1UL>::Zero();
+    REQUIRE(isnan(mat.unit()[0]));
+    mat = l.unit();
+    REQUIRE(mat[0] == l[0]/l.norm());
+    REQUIRE(mat[1] == l[1]/l.norm());
+    REQUIRE(mat[2] == l[2]/l.norm());
+  }
+
 }

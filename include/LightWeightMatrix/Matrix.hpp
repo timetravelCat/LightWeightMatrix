@@ -305,6 +305,57 @@ namespace lwm
      * @brief Fast Computation of Moore-Penrose Inverse Matrices, 8(2), 25–29. http://arxiv.org/abs/0804.4809
      */
     Matrix<T, N, M> pinv() const;
+
+    /**
+     * @brief rotation matrix functions
+     */
+    template<size_t M_ = M, enable_if_t<(M_ == 3) && (N == 3), void*> = nullptr>
+    Matrix<T, M_, 1> vee() const
+    {
+      Matrix<T, M_, 1> res;
+      res.data[0][0] = -data[1][2];
+      res.data[1][0] = data[0][2];
+      res.data[2][0] = -data[0][1];
+      return res;
+    }
+
+    /**
+     * @brief 1D functions
+     */
+    using Vector = conditional_t<N == 1, Matrix<T, M, 1>, Matrix<T, 1, N>>;
+
+    template<size_t M_ = M, size_t N_ = N, enable_if_t<((M_ == 1 && N_ > 1) || (N_ == 1 && M_ > 1)) && M_, void*> = nullptr>
+    inline T dot(const Vector& in) const
+    {
+      T res{ 0 };
+      for (size_t i = 0; i < SIZE; i++)
+        res += (*this)[i] * in[i];
+      return res;
+    }
+    template<size_t M_ = M, size_t N_ = N, enable_if_t<((M_ == 1 && N_ > 1) || (N_ == 1 && M_ > 1)) && M_, void*> = nullptr>
+    inline T norm() const 
+    {
+      return sqrt(dot(*this));
+    }
+    template<size_t M_ = M, size_t N_ = N, enable_if_t<((M_ == 1 && N_ > 1) || (N_ == 1 && M_ > 1)) && M_, void*> = nullptr>
+    inline T normSquared() const 
+    {
+      return (dot(*this));
+    }
+    template<size_t M_ = M, size_t N_ = N, enable_if_t<((M_ == 1 && N_ > 1) || (N_ == 1 && M_ > 1)) && M_, void*> = nullptr>
+    inline Vector unit(const T eps = T(1e-5)) const 
+    {
+      const T n = norm();
+      if(n < eps)
+        return NaN();
+      return (*this)/n;
+    }
+    template<size_t M_ = M, size_t N_ = N, enable_if_t<((M_ == 1 && N_ > 1) || (N_ == 1 && M_ > 1)) && M_, void*> = nullptr>
+    inline Vector normalized(const T eps = T(1e-5)) const 
+    {
+      return unit(eps);
+    }
+
     /**
      * @brief Mathmatical operations
      */
