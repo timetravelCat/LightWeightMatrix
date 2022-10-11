@@ -644,6 +644,29 @@ TEST_CASE("Matrix", "[lwm::Matrix]")
     REQUIRE(mat[0] == l[0]/l.norm());
     REQUIRE(mat[1] == l[1]/l.norm());
     REQUIRE(mat[2] == l[2]/l.norm());
+
+    Matrix<double, 2UL, 1UL> l_{{1.0, 2.0}};
+    Matrix<double, 2UL, 1UL> r_{{3.0, 4.0}};
+    auto cross = l_.cross(r_);
+    REQUIRE(cross == 1.0*4.0 - 2.0*3.0);
+
+    Matrix<double, 1UL, 3UL> l__{{1.0, 2.0, 3.0}};
+    Matrix<double, 1UL, 3UL> r__{{3.0, 4.0, 6.0}};
+    auto cross2 = l__.cross(r__);
+    REQUIRE(cross2[0] == l__[1] * r__[2] - l__[2] * r__[1]);
+    REQUIRE(cross2[1] == -l__[0] * r__[2] + l__[2] * r__[0]);
+    REQUIRE(cross2[2] == l__[0] * r__[1] - l__[1] * r__[0]);
+
+    auto hat = l__.hat();
+    REQUIRE(hat[0][0] == 0);
+    REQUIRE(hat[0][1] == -l__[2]) ;
+    REQUIRE(hat[0][2] == l__[1]);
+    REQUIRE(hat[1][0] == l__[2]);
+    REQUIRE(hat[1][1] == 0) ;
+    REQUIRE(hat[1][2] == -l__[0]);
+    REQUIRE(hat[2][0] == -l__[1]);
+    REQUIRE(hat[2][1] == l__[0]);
+    REQUIRE(hat[2][2] == 0);
   }
 
 }

@@ -324,7 +324,7 @@ namespace lwm
      */
     using Vector = conditional_t<N == 1, Matrix<T, M, 1>, Matrix<T, 1, N>>;
 
-    template<size_t M_ = M, size_t N_ = N, enable_if_t<((M_ == 1 && N_ > 1) || (N_ == 1 && M_ > 1)) && M_, void*> = nullptr>
+    template<size_t M_ = M, size_t N_ = N, enable_if_t<((M_ == 1 && N_ > 1) || (N_ == 1 && M_ > 1)), void*> = nullptr>
     inline T dot(const Vector& in) const
     {
       T res{ 0 };
@@ -332,28 +332,59 @@ namespace lwm
         res += (*this)[i] * in[i];
       return res;
     }
-    template<size_t M_ = M, size_t N_ = N, enable_if_t<((M_ == 1 && N_ > 1) || (N_ == 1 && M_ > 1)) && M_, void*> = nullptr>
-    inline T norm() const 
+    template<size_t M_ = M, size_t N_ = N, enable_if_t<((M_ == 1 && N_ > 1) || (N_ == 1 && M_ > 1)), void*> = nullptr>
+    inline T norm() const
     {
       return sqrt(dot(*this));
     }
-    template<size_t M_ = M, size_t N_ = N, enable_if_t<((M_ == 1 && N_ > 1) || (N_ == 1 && M_ > 1)) && M_, void*> = nullptr>
-    inline T normSquared() const 
+    template<size_t M_ = M, size_t N_ = N, enable_if_t<((M_ == 1 && N_ > 1) || (N_ == 1 && M_ > 1)), void*> = nullptr>
+    inline T normSquared() const
     {
       return (dot(*this));
     }
-    template<size_t M_ = M, size_t N_ = N, enable_if_t<((M_ == 1 && N_ > 1) || (N_ == 1 && M_ > 1)) && M_, void*> = nullptr>
-    inline Vector unit(const T eps = T(1e-5)) const 
+    template<size_t M_ = M, size_t N_ = N, enable_if_t<((M_ == 1 && N_ > 1) || (N_ == 1 && M_ > 1)), void*> = nullptr>
+    inline Vector unit(const T eps = T(1e-5)) const
     {
       const T n = norm();
-      if(n < eps)
+      if (n < eps)
         return NaN();
-      return (*this)/n;
+      return (*this) / n;
     }
-    template<size_t M_ = M, size_t N_ = N, enable_if_t<((M_ == 1 && N_ > 1) || (N_ == 1 && M_ > 1)) && M_, void*> = nullptr>
-    inline Vector normalized(const T eps = T(1e-5)) const 
+    template<size_t M_ = M, size_t N_ = N, enable_if_t<((M_ == 1 && N_ > 1) || (N_ == 1 && M_ > 1)), void*> = nullptr>
+    inline Vector normalized(const T eps = T(1e-5)) const
     {
       return unit(eps);
+    }
+
+    // Implement cross project for 2d and 3d
+    template<size_t M_ = M, size_t N_ = N, enable_if_t<((M_ == 2 && N_ == 1) || (N_ == 2 && M_ == 1)), void*> = nullptr>
+    inline T cross(const Vector& r) const
+    {
+      const Vector& l{ *this };
+      return l[0] * r[1] - l[1] * r[0];
+    }
+
+    template<size_t M_ = M, size_t N_ = N, enable_if_t<((M_ == 3 && N_ == 1) || (N_ == 3 && M_ == 1)), void*> = nullptr>
+    inline Vector cross(const Vector& r) const
+    {
+      const Vector& l{ *this };
+      return Vector{ { l[1] * r[2] - l[2] * r[1], -l[0] * r[2] + l[2] * r[0], l[0] * r[1] - l[1] * r[0] } };
+    }
+
+    template<size_t M_ = M, size_t N_ = N, enable_if_t<((M_ == 3 && N_ == 1) || (N_ == 3 && M_ == 1)), void*> = nullptr>
+    inline Matrix<T, 3, 3> hat() const
+    {
+      Matrix<T, 3, 3> res;
+      res.data[0][0] = 0;
+      res.data[0][1] = -(*this)[2];
+      res.data[0][2] = (*this)[1];
+      res.data[1][0] = (*this)[2];
+      res.data[1][1] = 0;
+      res.data[1][2] = -(*this)[0];
+      res.data[2][0] = -(*this)[1];
+      res.data[2][1] = (*this)[0];
+      res.data[2][2] = 0;
+      return res;
     }
 
     /**
