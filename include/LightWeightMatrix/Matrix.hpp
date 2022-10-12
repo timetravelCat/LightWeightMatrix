@@ -310,82 +310,30 @@ namespace lwm
      * @brief rotation matrix functions
      */
     template<size_t M_ = M, enable_if_t<(M_ == 3) && (N == 3), void*> = nullptr>
-    Matrix<T, M_, 1> vee() const
-    {
-      Matrix<T, M_, 1> res;
-      res.data[0][0] = -data[1][2];
-      res.data[1][0] = data[0][2];
-      res.data[2][0] = -data[0][1];
-      return res;
-    }
-
+    Matrix<T, M_, 1> vee() const;
     /**
      * @brief 1D functions
      */
     using Vector = conditional_t<N == 1, Matrix<T, M, 1>, Matrix<T, 1, N>>;
 
     template<size_t M_ = M, size_t N_ = N, enable_if_t<((M_ == 1 && N_ > 1) || (N_ == 1 && M_ > 1)), void*> = nullptr>
-    inline T dot(const Vector& in) const
-    {
-      T res{ 0 };
-      for (size_t i = 0; i < SIZE; i++)
-        res += (*this)[i] * in[i];
-      return res;
-    }
+    inline T dot(const Vector& in) const;
     template<size_t M_ = M, size_t N_ = N, enable_if_t<((M_ == 1 && N_ > 1) || (N_ == 1 && M_ > 1)), void*> = nullptr>
-    inline T norm() const
-    {
-      return sqrt(dot(*this));
-    }
+    inline T norm() const;
     template<size_t M_ = M, size_t N_ = N, enable_if_t<((M_ == 1 && N_ > 1) || (N_ == 1 && M_ > 1)), void*> = nullptr>
-    inline T normSquared() const
-    {
-      return (dot(*this));
-    }
+    inline T normSquared() const;
     template<size_t M_ = M, size_t N_ = N, enable_if_t<((M_ == 1 && N_ > 1) || (N_ == 1 && M_ > 1)), void*> = nullptr>
-    inline Vector unit(const T eps = T(1e-5)) const
-    {
-      const T n = norm();
-      if (n < eps)
-        return NaN();
-      return (*this) / n;
-    }
+    inline Vector unit(const T eps = T(1e-5)) const;
     template<size_t M_ = M, size_t N_ = N, enable_if_t<((M_ == 1 && N_ > 1) || (N_ == 1 && M_ > 1)), void*> = nullptr>
-    inline Vector normalized(const T eps = T(1e-5)) const
-    {
-      return unit(eps);
-    }
-
-    // Implement cross project for 2d and 3d
+    inline Vector normalized(const T eps = T(1e-5)) const;
     template<size_t M_ = M, size_t N_ = N, enable_if_t<((M_ == 2 && N_ == 1) || (N_ == 2 && M_ == 1)), void*> = nullptr>
-    inline T cross(const Vector& r) const
-    {
-      const Vector& l{ *this };
-      return l[0] * r[1] - l[1] * r[0];
-    }
-
+    inline T cross(const Vector& r) const;
     template<size_t M_ = M, size_t N_ = N, enable_if_t<((M_ == 3 && N_ == 1) || (N_ == 3 && M_ == 1)), void*> = nullptr>
-    inline Vector cross(const Vector& r) const
-    {
-      const Vector& l{ *this };
-      return Vector{ { l[1] * r[2] - l[2] * r[1], -l[0] * r[2] + l[2] * r[0], l[0] * r[1] - l[1] * r[0] } };
-    }
-
+    inline Vector cross(const Vector& r) const;
     template<size_t M_ = M, size_t N_ = N, enable_if_t<((M_ == 3 && N_ == 1) || (N_ == 3 && M_ == 1)), void*> = nullptr>
-    inline Matrix<T, 3, 3> hat() const
-    {
-      Matrix<T, 3, 3> res;
-      res.data[0][0] = 0;
-      res.data[0][1] = -(*this)[2];
-      res.data[0][2] = (*this)[1];
-      res.data[1][0] = (*this)[2];
-      res.data[1][1] = 0;
-      res.data[1][2] = -(*this)[0];
-      res.data[2][0] = -(*this)[1];
-      res.data[2][1] = (*this)[0];
-      res.data[2][2] = 0;
-      return res;
-    }
+    inline Matrix<T, 3, 3> hat() const;
+    template<size_t M_ = M, size_t N_ = N, enable_if_t<((M_ == 3 && N_ == 3)), void*> = nullptr>
+    inline Matrix normalized(const T eps = T(1e-5)) const;
 
     /**
      * @brief Mathmatical operations
@@ -744,25 +692,35 @@ namespace lwm
   using Vectorld = Vector<long double, N>;
 
   template<typename T>
+  using Vector2 = ColVector<T, 2>;
+  using Vector2i = Vector<int, 2>;
+  using Vector2ui = Vector<unsigned int, 2>;
+  using Vector2f = Vector<float, 2>;
+  using Vector2d = Vector<double, 2>;
+  using Vector2ld = Vector<long double, 2>;
+
+  template<typename T>
+  using Vector3 = ColVector<T, 3>;
+  using Vector3i = Vector<int, 3>;
+  using Vector3ui = Vector<unsigned int, 3>;
+  using Vector3f = Vector<float, 3>;
+  using Vector3d = Vector<double, 3>;
+  using Vector3ld = Vector<long double, 3>;
+
+  template<typename T>
   using RotationMatrix = SquareMatrix<T, 3>;
-  using RotationMatrixi = RotationMatrix<int>;
-  using RotationMatrixui = RotationMatrix<unsigned int>;
   using RotationMatrixf = RotationMatrix<float>;
   using RotationMatrixd = RotationMatrix<double>;
   using RotationMatrixld = RotationMatrix<long double>;
 
   template<typename T>
   using DirectionCosineMatrix = RotationMatrix<T>;
-  using DirectionCosineMatrixi = DirectionCosineMatrix<int>;
-  using DirectionCosineMatrixui = DirectionCosineMatrix<unsigned int>;
   using DirectionCosineMatrixf = DirectionCosineMatrix<float>;
   using DirectionCosineMatrixd = DirectionCosineMatrix<double>;
   using DirectionCosineMatrixld = DirectionCosineMatrix<long double>;
 
   template<typename T>
   using DCM = DirectionCosineMatrix<T>;
-  using DCMi = DCM<int>;
-  using DCMui = DCM<unsigned int>;
   using DCMf = DCM<float>;
   using DCMd = DCM<double>;
   using DCMld = DCM<long double>;

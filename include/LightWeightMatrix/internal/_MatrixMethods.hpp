@@ -553,7 +553,6 @@ namespace lwm
 
     return P;
   }
-
   template<typename T, size_t M, size_t N>
   template<typename T_, enable_if_t<M == N && is_floating_point<T_>::value, void*>>
   Matrix<T, M, 1> Matrix<T, M, N>::diag() const
@@ -639,6 +638,92 @@ namespace lwm
       return (L * A) * transpose();
     }
   }
+  template<typename T, size_t M, size_t N>
+  template<size_t M_, enable_if_t<(M_ == 3) && (N == 3), void*>>
+  Matrix<T, M_, 1> Matrix<T, M, N>::vee() const
+  {
+    Matrix<T, M_, 1> res;
+    res.data[0][0] = -data[1][2];
+    res.data[1][0] = data[0][2];
+    res.data[2][0] = -data[0][1];
+    return res;
+  }
+  template<typename T, size_t M, size_t N>
+  template<size_t M_, size_t N_, enable_if_t<((M_ == 1 && N_ > 1) || (N_ == 1 && M_ > 1)), void*>>
+  inline T Matrix<T, M, N>::dot(const Matrix<T, M, N>::Vector& in) const
+  {
+    T res{ 0 };
+    for (size_t i = 0; i < SIZE; i++)
+      res += (*this)[i] * in[i];
+    return res;
+  }
+  template<typename T, size_t M, size_t N>
+  template<size_t M_, size_t N_, enable_if_t<((M_ == 1 && N_ > 1) || (N_ == 1 && M_ > 1)), void*>>
+  inline T Matrix<T, M, N>::norm() const
+  {
+    return sqrt(dot(*this));
+  }
+  template<typename T, size_t M, size_t N>
+  template<size_t M_, size_t N_, enable_if_t<((M_ == 1 && N_ > 1) || (N_ == 1 && M_ > 1)), void*>>
+  inline T Matrix<T, M, N>::normSquared() const
+  {
+    return (dot(*this));
+  }
+  template<typename T, size_t M, size_t N>
+  template<size_t M_, size_t N_, enable_if_t<((M_ == 1 && N_ > 1) || (N_ == 1 && M_ > 1)), void*>>
+  inline typename Matrix<T, M, N>::Vector Matrix<T, M, N>::unit(const T eps) const
+  {
+    const T n = norm();
+    if (n < eps)
+      return NaN();
+    return (*this) / n;
+  }
+  template<typename T, size_t M, size_t N>
+  template<size_t M_, size_t N_, enable_if_t<((M_ == 1 && N_ > 1) || (N_ == 1 && M_ > 1)), void*>>
+  inline typename Matrix<T, M, N>::Vector Matrix<T, M, N>::normalized(const T eps) const
+  {
+    return unit(eps);
+  }
+  template<typename T, size_t M, size_t N>
+  template<size_t M_, size_t N_, enable_if_t<((M_ == 2 && N_ == 1) || (N_ == 2 && M_ == 1)), void*>>
+  inline T Matrix<T, M, N>::cross(const typename Matrix<T, M, N>::Vector& r) const
+  {
+    const Matrix<T, M, N>::Vector& l{ *this };
+    return l[0] * r[1] - l[1] * r[0];
+  }
+  template<typename T, size_t M, size_t N>
+  template<size_t M_, size_t N_, enable_if_t<((M_ == 3 && N_ == 1) || (N_ == 3 && M_ == 1)), void*>>
+  inline typename Matrix<T, M, N>::Vector Matrix<T, M, N>::cross(const typename Matrix<T, M, N>::Vector& r) const
+  {
+    const typename Matrix<T, M, N>::Vector& l{ *this };
+    return Matrix<T, M, N>::Vector{ { l[1] * r[2] - l[2] * r[1], -l[0] * r[2] + l[2] * r[0], l[0] * r[1] - l[1] * r[0] } };
+  }
+  template<typename T, size_t M, size_t N>
+  template<size_t M_, size_t N_, enable_if_t<((M_ == 3 && N_ == 1) || (N_ == 3 && M_ == 1)), void*>>
+  inline Matrix<T, 3, 3> Matrix<T, M, N>::hat() const
+  {
+    Matrix<T, 3, 3> res;
+    res.data[0][0] = 0;
+    res.data[0][1] = -(*this)[2];
+    res.data[0][2] = (*this)[1];
+    res.data[1][0] = (*this)[2];
+    res.data[1][1] = 0;
+    res.data[1][2] = -(*this)[0];
+    res.data[2][0] = -(*this)[1];
+    res.data[2][1] = (*this)[0];
+    res.data[2][2] = 0;
+    return res;
+  }
+  template<typename T, size_t M, size_t N>
+  template<size_t M_, size_t N_, enable_if_t<((M_ == 3 && N_ == 3)), void*>>
+  inline Matrix<T, M, N> Matrix<T, M, N>::normalized(const T eps) const
+  {
+    Matrix<T, M, N> res;
+    for (size_t i = 0; i < 3; i++)
+      res.setRow(i, row(i).normalized(eps));
+    return res;
+  }
+
   template<typename T, size_t M, size_t N>
   template<size_t R, size_t C, size_t r, size_t c>
   void Matrix<T, M, N>::size_static_assert()
