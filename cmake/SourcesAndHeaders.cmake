@@ -23,4 +23,5 @@ set(test_sources
   src/Matrix.cpp
   src/Common.cpp
   src/Quaternion.cpp
+  src/AxisAngle.cpp
 )
