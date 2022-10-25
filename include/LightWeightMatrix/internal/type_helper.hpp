@@ -179,5 +179,10 @@ namespace lwm
     constexpr long double epsilon<long double>(){
       return LDBL_EPSILON;
     }
+    template<typename T>
+    int sign(T val)
+    {
+        return (epsilon<T>() < val) - (val < epsilon<T>());
+    }
   };  // namespace internal
 };    // namespace lwm

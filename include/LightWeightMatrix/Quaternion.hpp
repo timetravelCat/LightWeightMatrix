@@ -13,11 +13,15 @@
 #include <math.h>
 
 #include "Matrix.hpp"
+#include "AxisAngle.hpp"
 
 namespace lwm
 {
   template<typename T, size_t M, size_t N>
   class Matrix;
+
+  template<typename T>
+  class AxisAngle;
 
   template<typename T>
   class Quaternion : public Vector<T, 4>
@@ -116,7 +120,27 @@ namespace lwm
     }
 
     // Euler Angle Constructor
+
     // Axis Angle Constructor
+    template<typename U>
+    explicit Quaternion(const AxisAngle<U>& aa)
+    {
+      const T angle = aa.norm();
+      const Vector<T, 3> axis = aa.unit();
+      if (angle < epsilon<T>())
+      {
+        this->data[0][0] = T(1);
+        this->data[1][0] = this->data[2][0] = this->data[3][0] = 0;
+      }
+      else
+      {
+        T magnitude = sin(angle / T(2));
+        this->data[0][0] = cos(angle / T(2));
+        this->data[1][0] = axis(0) * magnitude;
+        this->data[2][0] = axis(1) * magnitude;
+        this->data[3][0] = axis(2) * magnitude;
+      }
+    }
 
     // Other Methods
     template<typename U>
@@ -138,47 +162,50 @@ namespace lwm
 
     static Quaternion exp(const Vector3<T>& u)
     {
-        const T tol = T(0.2);           // ensures an error < 10^-10
+      const T tol = T(0.2);  // ensures an error < 10^-10
 
-        T u_norm = u.norm();
-        T sinc_u, cos_u;
+      T u_norm = u.norm();
+      T sinc_u, cos_u;
 
-        if (u_norm < tol) {
-            T u2 = u_norm * u_norm;
-            T u4 = u2 * u2;
-            T u6 = u4 * u2;
+      if (u_norm < tol)
+      {
+        T u2 = u_norm * u_norm;
+        T u4 = u2 * u2;
+        T u6 = u4 * u2;
 
-            const T c2 = T(1.0 / 2.0);      // 1 / 2!
-            const T c3 = T(1.0 / 6.0);      // 1 / 3!
-            const T c4 = T(1.0 / 24.0);     // 1 / 4!
-            const T c5 = T(1.0 / 120.0);    // 1 / 5!
-            const T c6 = T(1.0 / 720.0);    // 1 / 6!
-            const T c7 = T(1.0 / 5040.0);   // 1 / 7!
+        const T c2 = T(1.0 / 2.0);     // 1 / 2!
+        const T c3 = T(1.0 / 6.0);     // 1 / 3!
+        const T c4 = T(1.0 / 24.0);    // 1 / 4!
+        const T c5 = T(1.0 / 120.0);   // 1 / 5!
+        const T c6 = T(1.0 / 720.0);   // 1 / 6!
+        const T c7 = T(1.0 / 5040.0);  // 1 / 7!
 
-            // compute the first 4 terms of the Taylor serie
-            sinc_u = T(1.0) - u2 * c3 + u4 * c5 - u6 * c7;
-            cos_u = T(1.0) - u2 * c2 + u4 * c4 - u6 * c6;
-        } else {
-            sinc_u = T(sin(u_norm) / u_norm);
-            cos_u = T(cos(u_norm));
-        }
-        const Vector<T, 3> v = sinc_u * u;
-        return Quaternion{cos_u, v(0), v(1), v(2)};
+        // compute the first 4 terms of the Taylor serie
+        sinc_u = T(1.0) - u2 * c3 + u4 * c5 - u6 * c7;
+        cos_u = T(1.0) - u2 * c2 + u4 * c4 - u6 * c6;
+      }
+      else
+      {
+        sinc_u = T(sin(u_norm) / u_norm);
+        cos_u = T(cos(u_norm));
+      }
+      const Vector<T, 3> v = sinc_u * u;
+      return Quaternion{ cos_u, v(0), v(1), v(2) };
     };
 
-    Vector3<T> log() const 
+    Vector3<T> log() const
     {
       const Quaternion& q = *this;
       const T ang = acos(q(0));
-      if(abs(ang) < epsilon<T>())
+      if (abs(ang) < epsilon<T>())
         return Vector3<T>::Zero();
-      return imag()*ang/sin(ang);
+      return imag() * ang / sin(ang);
     }
 
     Quaternion inv() const
     {
       const Quaternion& q = *this;
-      return Quaternion(q(0) , -q(1), -q(2), -q(3));
+      return Quaternion(q(0), -q(1), -q(2), -q(3));
     }
 
     Quaternion normalized() const
@@ -188,7 +215,7 @@ namespace lwm
       return Quaternion(q(0) / normSq, q(1) / normSq, q(2) / normSq, q(3) / normSq);
     }
 
-    T real() const 
+    T real() const
     {
       const Quaternion& q = *this;
       return q(0);
@@ -200,19 +227,19 @@ namespace lwm
     }
 
     template<typename U>
-    Vector3<U> rotate(const Vector3<U> &vec) const 
+    Vector3<U> rotate(const Vector3<U>& vec) const
     {
-        const Quaternion& q = *this;
-        Quaternion v(T(0), vec(0), vec(1), vec(2));
-        return (q*v*q.inv()).imag();
+      const Quaternion& q = *this;
+      Quaternion v(T(0), vec(0), vec(1), vec(2));
+      return (q * v * q.inv()).imag();
     }
 
     template<typename U>
-    Vector3<U> rotateReverse(const Vector3<U> &vec) const 
+    Vector3<U> rotateReverse(const Vector3<U>& vec) const
     {
-        const Quaternion& q = *this;
-        Quaternion v(T(0), vec(0), vec(1), vec(2));
-        return (q.inv()*v*q).imag();
+      const Quaternion& q = *this;
+      Quaternion v(T(0), vec(0), vec(1), vec(2));
+      return (q.inv() * v * q).imag();
     }
 
    private:

@@ -92,5 +92,18 @@ TEST_CASE("Quaternion", "[lwm::Quaternion]")
     REQUIRE(rotvec1(0) == 1.0f);
     REQUIRE(rotvec1(1) == 0.0f);
     REQUIRE(rotvec1(2) == 0.0f);
+
+    Quaternion<float> quat13{AxisAngle<float>{0.0f, 0.0f, 0.0f}};
+    REQUIRE(quat13(0) == 1.0f);
+    REQUIRE(quat13(1) == 0.0f);
+    REQUIRE(quat13(2) == 0.0f);
+    REQUIRE(quat13(3) == 0.0f);
+
+    RotationMatrixf rotmat2 = RotationMatrixf::Identity();
+    Quaternion<float> quat14{rotmat2};
+    REQUIRE(quat14(0) == 1.0f);
+    REQUIRE(quat14(1) == 0.0f);
+    REQUIRE(quat14(2) == 0.0f);
+    REQUIRE(quat14(3) == 0.0f);
   }
 }
