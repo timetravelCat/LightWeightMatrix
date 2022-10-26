@@ -232,3 +232,10 @@ TEST_CASE("type_epsilon testing", "[lwm::internal::type_epsilon]")
   REQUIRE(epsilon<double>() == DBL_EPSILON);
   REQUIRE(epsilon<long double>() == LDBL_EPSILON);
 }
+
+TEST_CASE("PI", "[lwm::internal::PI]")
+{
+  REQUIRE(PI<float>() == M_PIf);
+  REQUIRE(PI<double>() == M_PI);
+  REQUIRE(PI<long double>() == M_PIl);
+}

@@ -12,6 +12,7 @@
 #pragma once
 #include "float.h"
 #include "type_traits.hpp"
+#include "math.h"
 
 namespace lwm
 {
@@ -179,6 +180,13 @@ namespace lwm
     constexpr long double epsilon<long double>(){
       return LDBL_EPSILON;
     }
+    template<typename T>
+    constexpr T PI() { return M_PIf; }
+    template<>
+    constexpr double PI<double>() {return M_PI; }
+    template<>
+    constexpr long double PI<long double>() {return M_PIl; }
+
     template<typename T>
     int sign(T val)
     {

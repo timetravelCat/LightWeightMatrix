@@ -24,4 +24,5 @@ set(test_sources
   src/Common.cpp
   src/Quaternion.cpp
   src/AxisAngle.cpp
+  src/Angle.cpp
 )

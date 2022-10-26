@@ -19,15 +19,21 @@ namespace lwm
 {
   enum class Range
   {
-    ZERO_TO_TWO_PI,
-    MINUS_PI_TO_PI //
+    MINUS_PI_TO_PI, //
+    ZERO_TO_TWO_PI
   };
+
+
 
   using namespace internal;
   template<typename T>
   class Angle
   {
    public:
+    static T RAD2DEG(const T& rad) {return rad*T(180)/PI<T>();}
+    static T DEG2RAD(const T& deg) {return deg*PI<T>()/T(180);}
+    // static T RAD2DEG(const T& rad) {return M_PIf}
+
     // https://github.com/ros/angles/blob/ros2/angles/include/angles/angles.h
     // https://softwareengineering.stackexchange.com/questions/272084/well-defined-mathematical-operations-for-bearing-angle-class
     // Static Methods
@@ -35,8 +41,6 @@ namespace lwm
     // DEG2RAD
     // Wrap Functions 
     
-
-
    private:
   };
 };  // namespace lwm
