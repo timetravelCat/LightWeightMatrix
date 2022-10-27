@@ -186,6 +186,8 @@ namespace lwm
     constexpr double PI<double>() {return M_PI; }
     template<>
     constexpr long double PI<long double>() {return M_PIl; }
+    template<typename T>
+    constexpr T PI2() {return T(2)*PI<T>();}
 
     template<typename T>
     int sign(T val)

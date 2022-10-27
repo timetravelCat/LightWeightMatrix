@@ -164,7 +164,11 @@ TEMPLATE_PRODUCT_TEST_CASE(
     "implicit_cast testing",
     "[template]",
     lwm::internal::implicit_cast,
-    ((double, double), (float, double), (int, double), (unsigned int, double, unsigned int, unsigned short), (unsigned, unsigned, double, unsigned)))
+    ((double, double),
+     (float, double),
+     (int, double),
+     (unsigned int, double, unsigned int, unsigned short),
+     (unsigned, unsigned, double, unsigned)))
 {
   REQUIRE(is_same<typename TestType::type, double>::value == true);
 }
@@ -173,7 +177,11 @@ TEMPLATE_PRODUCT_TEST_CASE(
     "implicit_cast testing",
     "[template]",
     lwm::internal::implicit_cast,
-    ((short, short, int), (unsigned int, short, int), (int, short, short), (unsigned int, short, unsigned int, unsigned short), (unsigned, unsigned, short, int)))
+    ((short, short, int),
+     (unsigned int, short, int),
+     (int, short, short),
+     (unsigned int, short, unsigned int, unsigned short),
+     (unsigned, unsigned, short, int)))
 {
   REQUIRE(is_same<typename TestType::type, int>::value == true);
 }
@@ -184,7 +192,7 @@ TEMPLATE_PRODUCT_TEST_CASE(
     lwm::internal::allowed_cast,
     ((float, double), (float, float), (float, long double)))
 {
-    REQUIRE(is_same<typename TestType::type, float>::value == true);
+  REQUIRE(is_same<typename TestType::type, float>::value == true);
 }
 
 TEMPLATE_PRODUCT_TEST_CASE(
@@ -193,27 +201,19 @@ TEMPLATE_PRODUCT_TEST_CASE(
     lwm::internal::allowed_cast,
     ((double, double), (double, float), (double, long double)))
 {
-    REQUIRE(is_same<typename TestType::type, double>::value == true);
+  REQUIRE(is_same<typename TestType::type, double>::value == true);
 }
 
-TEMPLATE_PRODUCT_TEST_CASE(
-    "floating_types_holer testing",
-    "[template]",
-    lwm::internal::floating_types_holer,
-    ((float)))
+TEMPLATE_PRODUCT_TEST_CASE("floating_types_holer testing", "[template]", lwm::internal::floating_types_holer, ((float)))
 {
-    REQUIRE(is_same<typename TestType::type_1, double>::value == true);
-    REQUIRE(is_same<typename TestType::type_2, long double>::value == true);
+  REQUIRE(is_same<typename TestType::type_1, double>::value == true);
+  REQUIRE(is_same<typename TestType::type_2, long double>::value == true);
 }
 
-TEMPLATE_PRODUCT_TEST_CASE(
-    "floating_types_holer testing",
-    "[template]",
-    lwm::internal::floating_types_holer,
-    ((double)))
+TEMPLATE_PRODUCT_TEST_CASE("floating_types_holer testing", "[template]", lwm::internal::floating_types_holer, ((double)))
 {
-    REQUIRE(is_same<typename TestType::type_1, float>::value == true);
-    REQUIRE(is_same<typename TestType::type_2, long double>::value == true);
+  REQUIRE(is_same<typename TestType::type_1, float>::value == true);
+  REQUIRE(is_same<typename TestType::type_2, long double>::value == true);
 }
 
 TEMPLATE_PRODUCT_TEST_CASE(
@@ -222,8 +222,8 @@ TEMPLATE_PRODUCT_TEST_CASE(
     lwm::internal::floating_types_holer,
     ((long double)))
 {
-    REQUIRE(is_same<typename TestType::type_1, float>::value == true);
-    REQUIRE(is_same<typename TestType::type_2, double>::value == true);
+  REQUIRE(is_same<typename TestType::type_1, float>::value == true);
+  REQUIRE(is_same<typename TestType::type_2, double>::value == true);
 }
 
 TEST_CASE("type_epsilon testing", "[lwm::internal::type_epsilon]")
@@ -238,4 +238,11 @@ TEST_CASE("PI", "[lwm::internal::PI]")
   REQUIRE(PI<float>() == M_PIf);
   REQUIRE(PI<double>() == M_PI);
   REQUIRE(PI<long double>() == M_PIl);
+}
+
+TEST_CASE("PI2", "[lwm::internal::PI2]")
+{
+  REQUIRE(PI2<float>() == float(2) * M_PIf);
+  REQUIRE(PI2<double>() == double(2) * M_PI);
+  REQUIRE(PI2<long double>() == static_cast<long double>(2) * M_PIl);
 }
