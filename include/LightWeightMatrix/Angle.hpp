@@ -32,6 +32,8 @@ namespace lwm
     template<typename U, ANGLE_RANGE RNG>
     friend class Angle;
 
+    explicit Angle() = default;
+
     static T RAD2DEG(const T& rad)
     {
       return rad * T(180) / PI<T>();
@@ -82,12 +84,81 @@ namespace lwm
       return isSame(lhs, rhs.val);
     }
 
-    // https://github.com/ros/angles/blob/ros2/angles/include/angles/angles.h
-    // https://softwareengineering.stackexchange.com/questions/272084/well-defined-mathematical-operations-for-bearing-angle-class
-    // Static Methods
-    // RAD2DEG
-    // DEG2RAD
-    // Wrap Functions
+    // + - operation for angle class
+    template<typename U, ANGLE_RANGE RNG>
+    Angle operator+(const Angle<U, RNG>& other) const
+    {
+      Angle res;
+      res.val = val + other.val;
+      res.wrap();
+      return res;
+    }
+    template<typename U, ANGLE_RANGE RNG>
+    void operator+=(const Angle<U, RNG>& other)
+    {
+      val += other.val;
+      wrap();
+    }
+    template<typename U, ANGLE_RANGE RNG>
+    Angle operator-(const Angle<U, RNG>& other) const
+    {
+      Angle res;
+      res.val = val - other.val;
+      res.wrap();
+      return res;
+    }
+    template<typename U, ANGLE_RANGE RNG>
+    void operator-=(const Angle<U, RNG>& other)
+    {
+      val -= other.val;
+      wrap();
+    }
+
+    template<typename U>
+    Angle operator+(const U& other) const
+    {
+      Angle res;
+      res.val = val + other;
+      res.wrap();
+      return res;
+    }
+    template<typename U>
+    void operator+=(const U& other)
+    {
+      val += other;
+      wrap();
+    }
+    template<typename U>
+    Angle operator-(const U& other) const
+    {
+      Angle res;
+      res.val = val - other;
+      res.wrap();
+      return res;
+    }
+    template<typename U>
+    void operator-=(const U& other)
+    {
+      val -= other;
+      wrap();
+    }
+
+    T& operator()(int dummy = 0)
+    {
+      (void)dummy;
+      return val;
+    }
+    const T& operator()(int dummy = 0) const
+    {
+      (void)dummy;
+      return val;
+    }
+
+    // template<typename U, ANGLE_RANGE RNG>
+    // Angle<U, RNG> cast()
+    // {
+    // }
+
 
    private:
     void wrap()
@@ -108,6 +179,6 @@ namespace lwm
       }
     };
 
-    T val;
+    T val{ 0 };
   };
 };  // namespace lwm

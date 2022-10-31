@@ -32,6 +32,25 @@ TEST_CASE("Angle", "[lwm::Angle]")
     // REQUIRE(ang == Angle<double, ANGLE_RANGE::MINUS_PI_TO_PI>{0.1});
   }
 
+  SECTION("+ - operations")
+  {
+      Angle<float, ANGLE_RANGE::MINUS_PI_TO_PI> ang1{0.1f};
+      Angle<float, ANGLE_RANGE::ZERO_TO_TWO_PI> ang2{0.2f};
+      auto ang3 = ang1 + ang2;
+      REQUIRE((ang3 == 0.1f + 0.2f));
+      ang3 -= ang1;
+      REQUIRE((ang3 == 0.1f + 0.2f - 0.1f));
+      ang3 += 0.1f;
+      REQUIRE((ang3 == 0.1f + 0.2f - 0.1f + 0.1f));
 
+      auto ang4 = ang2 - ang1;
+      REQUIRE((ang4 == 0.2f - 0.1f));
+      ang4 += ang1;
+      REQUIRE((ang4 == 0.2f - 0.1f + 0.1f));
+      ang4 -= 0.1f;
+      REQUIRE((ang4 == 0.2f - 0.1f + 0.1f - 0.1f));
+
+      REQUIRE((ang4() == 0.2f - 0.1f + 0.1f - 0.1f));
+  }
 
 }
