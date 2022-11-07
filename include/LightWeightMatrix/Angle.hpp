@@ -154,11 +154,27 @@ namespace lwm
       return val;
     }
 
+    template<typename U>
+    Angle<U, RANGE> cast() const
+    {
+      Angle<U, RANGE> res;
+      res.val = static_cast<U>(val);
+      return res;
+    }
+
+    template<ANGLE_RANGE RNG>
+    Angle<T, RNG> cast() const
+    {
+      Angle<T, RNG> res;
+      res.val = val;
+      res.wrap();
+      return res;
+    }
+
     // template<typename U, ANGLE_RANGE RNG>
     // Angle<U, RNG> cast()
     // {
     // }
-
 
    private:
     void wrap()
